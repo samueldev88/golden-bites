@@ -1,0 +1,12 @@
+{% load loja_tags %}
+<ul class="taxas">
+  {% for f in faixas %}
+  <li>
+    <span>{% if f.km_min == 0 %}Até {{ f.km_max|floatformat:"-1" }} km{% else %}{{ f.km_min|floatformat:"-1" }} a {{ f.km_max|floatformat:"-1" }} km{% endif %}</span>
+    <strong>{{ f.taxa|brl }}</strong>
+  </li>
+  {% endfor %}
+  {% if limite_km %}
+  <li><span>Acima de {{ limite_km|floatformat:"-1" }} km</span><strong>Consultar</strong></li>
+  {% endif %}
+</ul>

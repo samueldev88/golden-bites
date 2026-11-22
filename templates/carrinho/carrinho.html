@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static loja_tags %}
+{% block titulo %}Carrinho · {{ loja.nome }}{% endblock %}
+{% block cabecalho %}Seu carrinho{% endblock %}
+{% block content %}
+<div class="container estreito">
+  {% if itens or trocas %}
+    <ul class="itens-carrinho">
+      {% for i in itens %}
+      <li class="item-carrinho">
+        <img src="{% if i.produto.foto %}{{ i.produto.foto.url }}{% else %}{% static 'img/sem-foto.svg' %}{% endif %}" alt="" width="72" height="72">
+        <div class="item-info">
+          <h3>{{ i.produto.nome }}</h3>
+          <p class="item-preco">{{ i.produto.preco_final|brl }} cada</p>
+          <form class="stepper-form" method="post" action="{% url 'carrinho:atualizar' i.produto.id %}">
+            {% csrf_token %}
+            <div class="stepper" role="group" aria-label="Quantidade de {{ i.produto.nome }}">
+              <button type="submit" name="quantidade" value="{{ i.quantidade|add:'-1' }}" aria-label="Diminuir quantidade">−</button>
+              <output>{{ i.quantidade }}</output>
+              <button type="submit" name="quantidade" value="{{ i.quantidade|add:'1' }}" aria-label="Aumentar quantidade">+</button>
+            </div>
+          </form>
+        </div>
+        <div class="item-lado">
+          <strong>{{ i.subtotal|brl }}</strong>
+          <form method="post" action="{% url 'carrinho:remover' i.produto.id %}">
+            {% csrf_token %}
+            <button type="submit" class="link-discreto">Remover</button>
+          </form>
+        </div>
+      </li>
+      {% endfor %}
+      {% for t in trocas %}
+      <li class="item-carrinho item-troca">
+        <img src="{% if t.produto.foto %}{{ t.produto.foto.url }}{% else %}{% static 'img/sem-foto.svg' %}{% endif %}" alt="" width="72" height="72">
+        <div class="item-info">
+          <h3>{{ t.produto.nome }}</h3>
+          <p class="item-preco"><span class="etiqueta-troca">Troca de pontos</span> {{ t.quantidade }}× · {{ t.custo_unitario }} ponto{{ t.custo_unitario|pluralize }} cada</p>
+        </div>
+        <div class="item-lado">
+          <strong>{{ t.pontos }} pts</strong>
+          <form method="post" action="{% url 'carrinho:remover_troca' t.produto.id %}">
+            {% csrf_token %}
+            <button type="submit" class="link-discreto">Remover</button>
+          </form>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+
+    <section class="resumo">
+      <div class="linha"><span>Subtotal</span><strong>{{ subtotal|brl }}</strong></div>
+      {% if pontos_usados %}<div class="linha desconto"><span>Pontos usados</span><strong>{{ pontos_usados }} pts</strong></div>{% endif %}
+      <p class="nota">A taxa de entrega é calculada na próxima etapa, conforme o seu endereço.</p>
+      {% if abaixo_do_minimo %}
+        <p class="aviso">O pedido mínimo é {{ loja.pedido_minimo|brl }}. Adicione mais itens para continuar.</p>
+        <a class="btn btn-bloco btn-ouro" href="{% url 'catalogo:catalogo' %}">Continuar escolhendo</a>
+      {% else %}
+        <a class="btn btn-bloco btn-grande" href="{% url 'pedidos:checkout' %}">Finalizar pedido</a>
+        <p class="centro"><a class="link-discreto" href="{% url 'catalogo:catalogo' %}">Continuar escolhendo</a></p>
+      {% endif %}
+    </section>
+  {% else %}
+    <div class="estado-vazio">
+      <h2>Seu carrinho está vazio</h2>
+      <p>Escolha seus itens favoritos no catálogo.</p>
+      <a class="btn" href="{% url 'catalogo:catalogo' %}">Ver catálogo</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}  

@@ -1,0 +1,21 @@
+{% load loja_tags %}
+{% if pedidos %}
+<div class="p-tabela">
+  <table>
+    <thead><tr><th>Pedido</th><th>Cliente</th><th>Entrega</th><th>Status</th><th>Total</th></tr></thead>
+    <tbody>
+      {% for p in pedidos %}
+      <tr>
+        <td><a href="{% url 'painel:pedido_detalhe' p.codigo %}">{{ p.codigo }}</a><br><small>{{ p.criado_em|date:"d/m H:i" }}</small></td>
+        <td>{{ p.cliente.nome }}<br><small>{{ p.cliente.telefone }}</small></td>
+        <td>{{ p.get_modalidade_display }}{% if p.data_agendada %}<br><small>{{ p.data_agendada|date:"d/m/Y" }}</small>{% endif %}<br><small>{{ p.bairro_nome }}</small></td>
+        <td><span class="p-status s-{{ p.status }}">{{ p.get_status_display }}</span></td>
+        <td>{{ p.total|brl }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="p-vazio">Nenhum pedido por aqui.</p>
+{% endif %}

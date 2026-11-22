@@ -1,0 +1,62 @@
+{% load static %}
+<div class="cartao-area">
+  <div class="cartao-cena{% if bloqueado %} bloqueado{% endif %}" id="cartao-cena" data-pontos="{{ pontos|default:0 }}">
+    <div class="cartao-sombra" aria-hidden="true"></div>
+    <div class="cartao" id="cartao">
+      <div class="cartao-face frente" id="cartao-frente" aria-hidden="false"{% if not bloqueado %} role="button" tabindex="0" aria-label="Virar o cartão para ver as opções de segurança"{% endif %}>
+        <div class="cartao-textura" aria-hidden="true"></div>
+        <div class="cartao-topo">
+          <span class="cartao-logo"><img src="{% static 'img/logo-golden-bites.png' %}?v=20261120-2" alt="" width="64" height="64"></span>
+          <span class="cartao-marca"><b>{{ loja.nome }}</b><small>CLUBE DE FIDELIDADE</small></span>
+          <svg class="cartao-nfc" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7.5a6.5 6.5 0 0 1 0 9M12 5a10.5 10.5 0 0 1 0 14M16 2.5a14 14 0 0 1 0 19"/></svg>
+        </div>
+        <div class="cartao-chip" aria-hidden="true"></div>
+        <p class="cartao-numero">{% if bloqueado %}•••• •••• ••••{% else %}{{ telefone_cartao }}{% endif %}</p>
+        <div class="cartao-rodape">
+          <div class="cartao-titular">
+            <small>MEMBRO</small>
+            <b>{% if bloqueado %}CONFIRME SEU APARELHO{% else %}{{ cliente.nome }}{% endif %}</b>
+          </div>
+          <div class="cartao-pontos">
+            <small>PONTOS</small>
+            <b id="cartao-pontos-valor">{% if bloqueado %}—{% else %}{{ pontos }}{% endif %}</b>
+          </div>
+        </div>
+        {% if bloqueado %}
+        <div class="cartao-cadeado" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+        </div>
+        {% endif %}
+      </div>
+
+      {% if not bloqueado %}
+      <div class="cartao-face verso" id="cartao-verso" aria-hidden="true" inert>
+        <div class="cartao-textura" aria-hidden="true"></div>
+        <div class="cartao-tarja" aria-hidden="true"></div>
+        <div class="verso-corpo">
+          <p class="verso-titulo">Transfira seus pontos com segurança</p>
+          <p class="verso-nota">Gere no aparelho atual um código de uso único. Válido por {{ validade_vinculo_minutos }} minutos.</p>
+          <div class="transferencia-codigo">
+            <output id="codigo-vinculo" aria-live="polite" hidden></output>
+            <form id="gerar-vinculo-form" method="post" action="{% url 'fidelidade:gerar_codigo_dispositivo' %}">
+              {% csrf_token %}
+              <button type="submit" class="verso-btn">Gerar código temporário</button>
+            </form>
+          </div>
+          <p id="codigo-vinculo-status" class="codigo-vinculo-status" role="status" aria-live="polite"></p>
+          <div class="verso-recuperacao">
+            <span><small>CÓDIGO DE RECUPERAÇÃO</small><b id="codigo-rec" data-codigo="{{ codigo_recuperacao }}">•••••-•••••</b></span>
+            <button type="button" id="mostrar-codigo" class="verso-btn" aria-controls="codigo-rec">Mostrar</button>
+          </div>
+          <p class="verso-rodape">O código de recuperação é uma alternativa. Guarde-o em local seguro.</p>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% if not bloqueado %}
+  <button type="button" id="virar-cartao" class="cartao-virar" aria-controls="cartao" aria-pressed="false">
+    Ver código para outro aparelho
+  </button>
+  {% endif %}
+</div>

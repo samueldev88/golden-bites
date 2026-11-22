@@ -1,0 +1,76 @@
+{% extends "painel/base.html" %}
+{% load loja_tags %}
+{% block titulo %}{{ pedido.codigo }}{% endblock %}
+{% block conteudo %}
+<div class="p-barra">
+  <h1>Pedido {{ pedido.codigo }}</h1>
+  <a href="{% url 'painel:pedidos' %}">Voltar aos pedidos</a>
+</div>
+
+<div class="p-grade-2">
+  <section class="p-caixa">
+    <h2>Cliente</h2>
+    <p><strong>{{ pedido.cliente.nome }}</strong></p>
+    <p>WhatsApp: <a href="https://wa.me/55{{ pedido.cliente.telefone }}" target="_blank" rel="noopener">{{ pedido.cliente.telefone }}</a></p>
+    <p>{{ pedido.cliente.email }}</p>
+    <h2>Entrega</h2>
+    <p><strong>{{ pedido.get_modalidade_display }}</strong>{% if pedido.data_agendada %}: {{ pedido.data_agendada|date:"d/m/Y" }}{% if pedido.horario_combinado %} ({{ pedido.horario_combinado }}){% endif %}{% endif %}</p>
+    <p>{{ pedido.endereco_completo }}</p>
+    <p><a href="{{ pedido.link_mapa }}" target="_blank" rel="noopener">Abrir endereço no Google Maps</a></p>
+    {% if pedido.status == 'pago' or pedido.status == 'em_preparo' or pedido.status == 'saiu_entrega' %}
+    <p><a class="btn" href="{% url 'painel:entregador' pedido.codigo %}">Modo entregador (mapa e chat)</a></p>
+    {% endif %}
+    <p class="p-nota">Código de entrega do cliente: <strong>{{ pedido.codigo_entrega }}</strong></p>
+    {% if pedido.prazo_entrega %}<p class="p-nota">Previsão: {{ pedido.prazo_entrega|date:"H:i" }}{% if pedido.entregue_em %} · entregue às {{ pedido.entregue_em|date:"H:i" }}{% if pedido.atraso_min %} ({{ pedido.atraso_min }} min de atraso){% endif %}{% elif pedido.atrasado %} · <strong>atrasado</strong>{% endif %}</p>{% endif %}
+    {% if pedido.distancia_km is not None %}<p class="p-nota">Rota de bicicleta até o endereço: {{ pedido.distancia_km }} km</p>{% endif %}
+    {% if pedido.referencia %}<p>Referência: {{ pedido.referencia }}</p>{% endif %}
+    {% if pedido.observacoes %}<h2>Observações</h2><p>{{ pedido.observacoes }}</p>{% endif %}
+  </section>
+
+  <section class="p-caixa">
+    <h2>Itens</h2>
+    <ul class="p-itens">
+      {% for i in pedido.itens.all %}<li><span>{{ i.quantidade }}× {{ i.nome }}{% if i.resgate %} (troca de pontos){% endif %}</span><span>{% if i.resgate %}{{ i.pontos_resgate }} pts{% else %}{{ i.subtotal|brl }}{% endif %}</span></li>{% endfor %}
+    </ul>
+    <p class="p-linha"><span>Produtos</span><span>{{ pedido.subtotal|brl }}</span></p>
+    <p class="p-linha"><span>Entrega</span><span>{% if pedido.taxa_entrega is None %}A consultar{% else %}{{ pedido.taxa_entrega|brl }}{% endif %}</span></p>
+    {% if pedido.desconto %}<p class="p-linha"><span>Desconto{% if pedido.cupom %} ({{ pedido.cupom.codigo }}){% endif %}</span><span>-{{ pedido.desconto|brl }}</span></p>{% endif %}
+    {% if pedido.desconto_fidelidade %}<p class="p-linha"><span>Fidelidade ({{ pedido.pontos_resgatados }} pts)</span><span>-{{ pedido.desconto_fidelidade|brl }}</span></p>{% endif %}
+    <p class="p-linha total"><span>Total</span><span>{{ pedido.total|brl }}</span></p>
+    {% if pedido.pontos_resgatados %}<p class="p-nota"><strong>Troca de fidelidade:</strong> {{ pedido.pontos_resgatados }} pontos gastos em itens grátis (marcados na lista de itens).</p>{% endif %}
+    <p class="p-nota">Pagamento: {{ pedido.get_forma_pagamento_display }}{% if pedido.mp_status %} · Mercado Pago: {{ pedido.mp_status }}{% endif %}{% if pedido.mp_payment_id %} · nº {{ pedido.mp_payment_id }}{% endif %}</p>
+  </section>
+</div>
+
+<div class="p-grade-2">
+  <section class="p-caixa">
+    <h2>Status do pedido</h2>
+    {% if pedido.status == 'aguardando_pagamento' %}
+    <form method="post" class="p-form-linha" style="margin-bottom:12px">
+      {% csrf_token %}
+      <input type="hidden" name="acao" value="verificar">
+      <button class="btn" type="submit">Verificar pagamento no Mercado Pago</button>
+    </form>
+    {% endif %}
+    <form method="post" class="p-form-linha">
+      {% csrf_token %}
+      <input type="hidden" name="acao" value="status">
+      <select name="status" aria-label="Status do pedido">
+        {% for valor, nome in status_opcoes %}<option value="{{ valor }}"{% if pedido.status == valor %} selected{% endif %}>{{ nome }}</option>{% endfor %}
+      </select>
+      <button class="btn" type="submit">Salvar status</button>
+    </form>
+  </section>
+
+  <section class="p-caixa">
+    <h2>Taxa de entrega</h2>
+    <form method="post" class="p-form-linha">
+      {% csrf_token %}
+      <input type="hidden" name="acao" value="taxa">
+      <input type="text" name="taxa" inputmode="decimal" placeholder="Ex.: 12,00" value="{% if pedido.taxa_entrega is not None %}{{ pedido.taxa_entrega|stringformat:'.2f' }}{% endif %}" aria-label="Taxa de entrega em reais">
+      <button class="btn" type="submit">{% if pedido.status == 'aguardando_confirmacao' %}Confirmar e liberar pagamento{% else %}Atualizar taxa{% endif %}</button>
+    </form>
+    {% if pedido.status == 'aguardando_confirmacao' %}<p class="p-nota">Ao confirmar, o cliente consegue pagar pela página do pedido.</p>{% endif %}
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "painel/base.html" %}
+{% load loja_tags %}
+{% block titulo %}Em andamento{% endblock %}
+{% block conteudo %}
+<div class="p-barra">
+  <h1>Pedidos em andamento</h1>
+  <a href="{% url 'painel:pedidos' %}">Ver todos os pedidos</a>
+</div>
+<div class="p-quadro">
+  {% for col in colunas %}
+  <section class="p-coluna">
+    <h2>{{ col.titulo }} <span class="p-contagem">{{ col.pedidos|length }}</span></h2>
+    {% for p in col.pedidos %}
+    <article class="p-pedido">
+      <header>
+        <a href="{% url 'painel:pedido_detalhe' p.codigo %}"><strong>{{ p.codigo }}</strong></a>
+        <span>{{ p.total|brl }}</span>
+      </header>
+      <p>{{ p.cliente.nome }}<br><small>{{ p.bairro_nome }}{% if p.data_agendada %} · agendado {{ p.data_agendada|date:"d/m" }}{% endif %}</small></p>
+      <ul>{% for i in p.itens.all %}<li>{{ i.quantidade }}× {{ i.nome }}{% if i.resgate %} (troca){% endif %}</li>{% endfor %}</ul>
+      {% if p.pontos_resgatados %}<p class="p-nota">Troca de fidelidade neste pedido</p>{% endif %}
+      {% if p.prazo_entrega %}<p class="p-prazo{% if p.atrasado %} atrasado{% endif %}">Prazo {{ p.prazo_entrega|time:"H:i" }}{% if p.atrasado %} · atrasado{% endif %}</p>{% endif %}
+      {% if p.msgs_novas %}<p class="p-novas">{{ p.msgs_novas }} mensagem{{ p.msgs_novas|pluralize:",ns" }} nova{{ p.msgs_novas|pluralize }} do cliente</p>{% endif %}
+      {% if p.status == 'em_preparo' or p.status == 'saiu_entrega' %}
+        <a class="p-link-entrega" href="{% url 'painel:entregador' p.codigo %}">Modo entregador (mapa e chat)</a>
+      {% endif %}
+      {% if p.proximo and p.status != 'saiu_entrega' %}
+        <form method="post" action="{% url 'painel:pedido_avancar' p.codigo %}"{% if p.status == 'aguardando_pagamento' %} onsubmit="return confirm('Confirmar o pagamento deste pedido manualmente?')"{% endif %}>
+          {% csrf_token %}
+          <button type="submit" class="btn">{{ p.proximo.1 }}</button>
+        </form>
+      {% elif p.status == 'saiu_entrega' %}
+        <a class="btn" href="{% url 'painel:entregador' p.codigo %}">Confirmar com código</a>
+      {% elif p.status == 'aguardando_confirmacao' %}
+        <a class="btn" href="{% url 'painel:pedido_detalhe' p.codigo %}">Definir taxa</a>
+      {% endif %}
+    </article>
+    {% empty %}
+    <p class="p-vazio">Nenhum pedido.</p>
+    {% endfor %}
+  </section>
+  {% endfor %}
+</div>
+{% endblock %}

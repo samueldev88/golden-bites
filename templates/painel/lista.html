@@ -1,0 +1,28 @@
+{% extends "painel/base.html" %}
+{% block titulo %}{{ plural }}{% endblock %}
+{% block conteudo %}
+<div class="p-barra">
+  <h1>{{ plural }}</h1>
+  {% if url_novo %}<a class="btn" href="{{ url_novo }}">Adicionar</a>{% endif %}
+</div>
+{% if linhas %}
+<div class="p-tabela">
+  <table>
+    <thead><tr>{% for c in cabecalhos %}<th>{{ c }}</th>{% endfor %}<th></th></tr></thead>
+    <tbody>
+      {% for l in linhas %}
+      <tr>
+        {% for c in l.celulas %}<td>{{ c }}</td>{% endfor %}
+        <td class="p-acoes">
+          {% if l.editar %}<a href="{{ l.editar }}">Editar</a>{% endif %}
+          {% if l.excluir %}<a class="perigo" href="{{ l.excluir }}">Excluir</a>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="p-vazio">Nada cadastrado ainda.</p>
+{% endif %}
+{% endblock %}

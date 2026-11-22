@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load static loja_tags %}
+{% block titulo %}Sobre · {{ loja.nome }}{% endblock %}
+{% block cabecalho %}Sobre{% endblock %}
+{% block content %}
+<div class="container estreito">
+  <img class="logo-grande" src="{% static 'img/sobre-golden-bites.webp' %}?v=1" alt="Identidade visual da Golden Bites com brownies, trufas e sacolés" width="1312" height="1199">
+  {% if loja.sobre %}<p class="texto-sobre">{{ loja.sobre }}</p>{% endif %}
+
+  <section class="secao" aria-labelledby="horarios-funcionamento-titulo">
+    <h2 id="horarios-funcionamento-titulo" class="secao-titulo">Horários de funcionamento</h2>
+    <ul class="taxas horarios-funcionamento">
+      <li><span>Segunda-feira</span><strong class="horario-status aberto">Aberto</strong></li>
+      <li><span>Terça-feira</span><strong class="horario-status aberto">Aberto</strong></li>
+      <li><span>Quarta-feira</span><strong class="horario-status aberto">Aberto</strong></li>
+      <li><span>Quinta-feira</span><strong class="horario-status aberto">Aberto</strong></li>
+      <li><span>Sexta-feira</span><strong class="horario-status aberto">Aberto</strong></li>
+      <li><span>Sábado</span><strong class="horario-status aberto">Aberto</strong></li>
+      <li><span>Domingo</span><strong class="horario-status fechado">Fechado</strong></li>
+    </ul>
+  </section>
+
+  <section class="secao" aria-label="Taxas de entrega">
+    <h2 class="secao-titulo">Entregas rápidas</h2>
+    <p>Endereços até 12 km da loja. A taxa depende da distância:</p>
+    {% include "partials/_taxas.html" %}
+  </section>
+
+  <section class="secao">
+    <h2 class="secao-titulo">Entrega agendada</h2>
+    <p>Para endereços até {{ loja.raio_maximo_km }} km da loja (acima disso ainda não entregamos). Você escolhe a data
+       no pedido e combinamos o horário pelo WhatsApp. A antecedência mínima é de {{ loja.antecedencia_agendada_dias }} dia{{ loja.antecedencia_agendada_dias|pluralize }}.</p>
+  </section>
+
+  <section class="secao">
+    <h2 class="secao-titulo">Pagamento</h2>
+    <p>Pix ou cartão, com pagamento seguro pelo Mercado Pago.</p>
+    {% if loja.whatsapp %}
+      <p><a class="btn btn-ouro" href="https://wa.me/{{ loja.whatsapp }}">Falar no WhatsApp</a></p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

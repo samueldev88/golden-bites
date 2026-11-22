@@ -1,0 +1,12 @@
+{% extends "painel/base.html" %}
+{% block titulo %}Pedidos{% endblock %}
+{% block conteudo %}
+<div class="p-barra"><h1>Pedidos</h1></div>
+<div class="p-filtros">
+  <a href="{% url 'painel:pedidos' %}"{% if not status_atual %} class="ativo"{% endif %}>Todos</a>
+  {% for valor, nome in status_opcoes %}
+    <a href="?status={{ valor }}"{% if status_atual == valor %} class="ativo"{% endif %}>{{ nome }}</a>
+  {% endfor %}
+</div>
+{% include "painel/_tabela_pedidos.html" %}
+{% endblock %}

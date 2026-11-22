@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% load static loja_tags %}
+{% block titulo %}Pedido {{ pedido.codigo }} · {{ loja.nome }}{% endblock %}
+{% block cabecalho %}Pedido {{ pedido.codigo }}{% endblock %}
+{% block content %}
+<div class="container estreito">
+  <p class="status-pedido s-{{ pedido.status }}">{{ pedido.get_status_display }}</p>
+
+  {% if pedido.etapa is not None %}
+  <ol class="linha-tempo" aria-label="Andamento do pedido">
+    {% for passo in passos %}
+    <li class="{% if forloop.counter0 < pedido.etapa %}feito{% elif forloop.counter0 == pedido.etapa %}atual{% endif %}">
+      <span class="marca" aria-hidden="true"></span><span>{{ passo }}</span>
+    </li>
+    {% endfor %}
+  </ol>
+  {% endif %}
+
+  <section class="bloco-info">
+    {% if pedido.status == 'aguardando_confirmacao' %}
+      <h2>Estamos confirmando sua entrega</h2>
+      <p>Para o seu endereço a taxa de entrega é combinada com a gente. Assim que confirmarmos o valor, o pagamento é liberado aqui nesta página.</p>
+      {% if whatsapp_url %}<a class="btn btn-ouro" href="{{ whatsapp_url }}">Falar no WhatsApp</a>{% endif %}
+    {% elif pedido.status == 'aguardando_pagamento' %}
+      <h2>Falta só o pagamento</h2>
+      <p>Seu pedido fica reservado enquanto o pagamento é concluído.</p>
+      <div class="botoes-pagamento">
+        <a class="btn btn-grande {% if pedido.forma_pagamento != 'pix' %}btn-ouro{% endif %}" href="{% url 'pedidos:pagar' pedido.codigo %}?forma=pix">Pagar com Pix</a>
+        <a class="btn btn-grande {% if pedido.forma_pagamento != 'cartao' %}btn-ouro{% endif %}" href="{% url 'pedidos:pagar' pedido.codigo %}?forma=cartao">Pagar com cartão</a>
+      </div>
+      {% if pedido.mp_preference_id %}
+      <p class="nota" style="margin-top:14px">Já pagou? Esta página se atualiza sozinha. Se preferir, <a href="{% url 'pedidos:verificar' pedido.codigo %}">verifique o pagamento agora</a>.</p>
+      {% endif %}
+    {% elif pedido.status == 'cancelado' %}
+      <h2>Pedido cancelado</h2>
+      <p>Se foi um engano, fale com a gente e refazemos o pedido.</p>
+      {% if whatsapp_url %}<a class="btn btn-ouro" href="{{ whatsapp_url }}">Falar no WhatsApp</a>{% endif %}
+    {% elif pedido.status == 'entregue' %}
+      <h2>Pedido entregue</h2>
+      <p>Esperamos que tenha sido um doce momento. Obrigado por escolher a {{ loja.nome }}!</p>
+      {% if bonus_pontos %}
+      <p>A entrega passou da previsão em {{ pedido.atraso_min }} min, então você ganhou <strong>{{ bonus_pontos }} ponto{{ bonus_pontos|pluralize }}</strong> de fidelidade. Pedimos desculpas pela demora!</p>
+      {% endif %}
+    {% else %}
+      <h2>Pagamento confirmado</h2>
+      <p>{% if pedido.modalidade == 'agendada' %}Entrega agendada para {{ pedido.data_agendada|date:"d/m/Y" }}. Vamos combinar o horário pelo WhatsApp.{% else %}Estamos preparando o seu pedido para a entrega rápida.{% endif %}</p>
+      {% if whatsapp_url %}<a class="btn btn-ouro" href="{{ whatsapp_url }}">Falar no WhatsApp</a>{% endif %}
+    {% endif %}
+  </section>
+
+  {% if pedido.status == 'entregue' and produtos_pendentes %}
+  {% with item_avaliar=produtos_pendentes|first %}
+  <section class="avaliacao-pedido-disponivel">
+    <p>Seu pedido chegou! Ainda há produtos esperando sua avaliação.</p>
+    <button class="btn btn-ouro" type="button" data-abrir-avaliacao>Avaliar produtos</button>
+  </section>
+  <dialog class="avaliacao-modal" id="modal-avaliacao" open aria-labelledby="titulo-modal-avaliacao">
+    <button class="avaliacao-modal-fechar" type="button" data-fechar-avaliacao aria-label="Fechar avaliação">×</button>
+    <p class="avaliacao-modal-etiqueta">Pedido entregue</p>
+    <h2 id="titulo-modal-avaliacao">Como foi {{ item_avaliar.produto.nome }}?</h2>
+    <p>Obrigado por escolher a {{ loja.nome }}. Conte o que achou deste produto; depois você poderá avaliar os outros itens do pedido.</p>
+    <form method="post" action="{% url 'pedidos:avaliar_produto' pedido.codigo item_avaliar.produto_id %}">
+      {% csrf_token %}
+      <fieldset class="avaliacao-campo">
+        <legend>Sua nota</legend>
+        <div class="avaliacao-estrelas" role="radiogroup" aria-label="Avalie de 1 a 5 estrelas">
+          {% for valor, rotulo in avaliacao_form.fields.nota.choices %}
+          <label class="avaliacao-estrela" for="nota-{{ item_avaliar.produto_id }}-{{ valor }}">
+            <input id="nota-{{ item_avaliar.produto_id }}-{{ valor }}" type="radio" name="nota" value="{{ valor }}" required>
+            <span aria-hidden="true">★</span>
+            <span class="sr-only">{{ rotulo }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+      <label class="avaliacao-label" for="id_comentario">{{ avaliacao_form.comentario.label }}</label>
+      {{ avaliacao_form.comentario }}
+      <button class="btn btn-ouro" type="submit">Enviar avaliação</button>
+    </form>
+  </dialog>
+  {% endwith %}
+  {% elif pedido.status == 'entregue' and avaliacoes_produtos %}
+  <section class="avaliacao-pedido" aria-live="polite">
+    <h2>Obrigado por avaliar nossos produtos!</h2>
+    <p>A {{ loja.nome }} agradece por escolher estar conosco. Seu feedback ajuda outras pessoas a escolherem.</p>
+    {% for avaliacao in avaliacoes_produtos %}
+    <article class="avaliacao-cliente-pedido">
+      <strong>{{ avaliacao.produto.nome }}</strong>
+      <span class="avaliacao-estrelas-marcadas" aria-label="{{ avaliacao.nota }} de 5 estrelas">{{ avaliacao.estrelas }}</span>
+      <p class="avaliacao-comentario">{{ avaliacao.comentario }}</p>
+    </article>
+    {% endfor %}
+  </section>
+  {% endif %}
+
+  {% if pedido.prazo_entrega and pedido.status != 'entregue' and pedido.status != 'cancelado' %}
+  <section class="previsao" data-prazo="{{ pedido.prazo_entrega|date:'c' }}" data-modo="cliente">
+    <p class="previsao-rotulo">Previsão de entrega</p>
+    <p class="previsao-hora">{{ pedido.prazo_entrega|date:"H:i" }}</p>
+    {% if loja.fidelidade_ativa %}<p class="nota prazo-nota"></p>{% endif %}
+  </section>
+  {% endif %}
+
+  {% if pedido.status == 'pago' or pedido.status == 'em_preparo' or pedido.status == 'saiu_entrega' %}
+  <section class="codigo-entrega">
+    <p class="codigo-rotulo">Código de entrega</p>
+    <p class="codigo-valor" aria-label="Código de entrega: {{ pedido.codigo_entrega }}">{{ pedido.codigo_entrega }}</p>
+    <p class="nota">Informe este código ao entregador somente quando receber o seu pedido.</p>
+  </section>
+  {% endif %}
+
+  {% if pedido.status == 'saiu_entrega' %}
+  <section class="rastreio" id="rastreio" aria-live="polite"
+           data-url="{% url 'pedidos:rastreio' pedido.codigo %}" data-icone="{% static 'img/entregador.svg' %}">
+    <h2>Seu pedido está a caminho</h2>
+    <p class="rastreio-texto" id="rastreio-texto">Procurando a localização do entregador…</p>
+    <div class="rastreio-mapa" id="rastreio-mapa" aria-label="Mapa com a posição do entregador"></div>
+  </section>
+  {% endif %}
+
+  {% if pedido.chat_ativo %}
+    {% url 'pedidos:chat' pedido.codigo as chat_lista %}
+    {% url 'pedidos:chat_enviar' pedido.codigo as chat_enviar %}
+    {% include "partials/_chat.html" with chat_lista=chat_lista chat_enviar=chat_enviar chat_autor="cliente" chat_titulo="Converse com o entregador" chat_vazio="Nenhuma mensagem ainda. Fale com o entregador por aqui." %}
+  {% endif %}
+
+  <section class="resumo">
+    <h2>Itens</h2>
+    <ul class="resumo-itens">
+      {% for i in pedido.itens.all %}
+      <li><span>{{ i.quantidade }}× {{ i.nome }}{% if i.resgate %} <em>troca de pontos</em>{% endif %}</span><span>{% if i.resgate %}{{ i.pontos_resgate }} pts{% else %}{{ i.subtotal|brl }}{% endif %}</span></li>
+      {% endfor %}
+    </ul>
+    <div class="linha"><span>Produtos</span><strong>{{ pedido.subtotal|brl }}</strong></div>
+    <div class="linha"><span>Entrega</span><strong>{% if pedido.taxa_entrega is None %}A consultar{% else %}{{ pedido.taxa_entrega|brl }}{% endif %}</strong></div>
+    {% if pedido.desconto %}<div class="linha desconto"><span>Desconto{% if pedido.cupom %} ({{ pedido.cupom.codigo }}){% endif %}</span><strong>-{{ pedido.desconto|brl }}</strong></div>{% endif %}
+    {% if pedido.desconto_fidelidade %}<div class="linha desconto"><span>Fidelidade ({{ pedido.pontos_resgatados }} pontos)</span><strong>-{{ pedido.desconto_fidelidade|brl }}</strong></div>{% endif %}
+    <div class="linha total"><span>Total</span><strong>{{ pedido.total|brl }}</strong></div>
+  </section>
+
+  {% if loja.fidelidade_ativa and pedido.pontos_ganhos %}
+  <p class="nota centro">Este pedido vale <strong>{{ pedido.pontos_ganhos }} ponto{{ pedido.pontos_ganhos|pluralize }}</strong> de fidelidade{% if pedido.status == 'aguardando_pagamento' or pedido.status == 'aguardando_confirmacao' %}, creditados quando o pagamento for confirmado{% endif %}. <a href="{% url 'fidelidade:pagina' %}">Ver meus pontos</a></p>
+  {% endif %}
+
+  <section class="resumo">
+    <h2>Entrega</h2>
+    <p><strong>{{ pedido.get_modalidade_display }}</strong>{% if pedido.modalidade == 'agendada' and pedido.data_agendada %}: {{ pedido.data_agendada|date:"d/m/Y" }}{% if pedido.horario_combinado %}, {{ pedido.horario_combinado }}{% endif %}{% endif %}</p>
+    <p>{{ pedido.endereco_completo }}</p>
+    {% if pedido.referencia %}<p class="nota">Referência: {{ pedido.referencia }}</p>{% endif %}
+    <p class="nota">Pagamento: {{ pedido.get_forma_pagamento_display }} pelo Mercado Pago</p>
+  </section>
+</div>
+{% if mostrar_pagamento_aprovado %}
+<dialog class="pagamento-aprovado" id="modal-pagamento-aprovado" open aria-labelledby="modal-pagamento-titulo" aria-describedby="modal-pagamento-texto">
+  <div class="pagamento-aprovado-conteudo">
+    <span class="pagamento-aprovado-icone" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="m5 12.5 4.2 4.2L19 7"/></svg>
+    </span>
+    <p class="pagamento-aprovado-etiqueta">Pagamento aprovado</p>
+    <h2 id="modal-pagamento-titulo">Pedido confirmado!</h2>
+    <p id="modal-pagamento-texto">O pagamento foi confirmado e seu pedido foi recebido. Acompanhe por esta página as próximas etapas de preparação e entrega.</p>
+    {% if pedido.modalidade == 'agendada' and pedido.data_agendada %}
+    <p class="pagamento-aprovado-data">Entrega agendada para {{ pedido.data_agendada|date:"d/m/Y" }}. O horário será combinado pelo WhatsApp.</p>
+    {% endif %}
+    <form method="dialog">
+      <button class="btn btn-ouro btn-bloco" type="submit">Acompanhar pedido</button>
+    </form>
+  </div>
+</dialog>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if mostrar_pagamento_aprovado %}
+<script nonce="{{ request.csp_nonce }}">
+  (() => {
+    const dialog = document.getElementById("modal-pagamento-aprovado");
+    if (dialog && typeof dialog.showModal === "function") {
+      dialog.removeAttribute("open");
+      dialog.showModal();
+    }
+    const url = new URL(window.location.href);
+    url.searchParams.delete("pagamento");
+    window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
+  })();
+</script>
+{% endif %}
+{% if pedido.status == 'entregue' and produtos_pendentes %}
+<script src="{% static 'js/avaliacao-modal.js' %}" defer></script>
+{% endif %}
+{% if pedido.status == 'aguardando_pagamento' and pedido.mp_preference_id or pedido.status == 'pago' or pedido.status == 'em_preparo' or pedido.status == 'saiu_entrega' %}
+<script nonce="{{ request.csp_nonce }}">
+  window.STATUS_PEDIDO_URL = "{% url 'pedidos:status' pedido.codigo %}";
+  window.STATUS_ATUAL = "{{ pedido.status }}";
+</script>
+<script src="{% static 'js/status.js' %}?v=20261122-2" defer></script>
+{% endif %}
+{% if pedido.chat_ativo %}<script src="{% static 'js/chat.js' %}" defer></script>{% endif %}
+{% if pedido.prazo_entrega and pedido.status != 'entregue' and pedido.status != 'cancelado' %}<script src="{% static 'js/prazo.js' %}" defer></script>{% endif %}
+{% if pedido.status == 'saiu_entrega' %}<script src="{% static 'js/rastreio.js' %}" defer></script>{% endif %}
+{% endblock %}

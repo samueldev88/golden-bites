@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% load static loja_tags %}
+{% block classe_body %}pagina-inicial{% endblock %}
+{% block topo %}{% endblock %}
+{% block content %}
+<section class="banner" aria-label="Trufas, brownies e sacolés da Golden Bites">
+  <img src="{% static 'img/banner-golden-bites.webp' %}?v=3" alt="Trufas, brownies e sacolés da Golden Bites" width="1672" height="941" fetchpriority="high">
+</section>
+
+<section class="perfil container">
+  <div class="logo-redonda">
+    <img src="{% static 'img/logo-golden-bites.png' %}?v=20261120-2" alt="Logo {{ loja.nome }}" width="148" height="148" fetchpriority="high">
+  </div>
+  <h1 class="loja-nome">{{ loja.nome }}</h1>
+  <p class="loja-local">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5a7 7 0 0 0-14 0C5 14.800 12 21 12 21z"/><circle cx="12" cy="9.500" r="2.500"/></svg>
+    {{ loja.cidade_texto }} <span class="ponto">•</span> <a href="{% url 'catalogo:sobre' %}">Mais informações</a>
+  </p>
+  <p class="status {% if loja.loja_aberta %}aberto{% else %}fechado{% endif %}">
+    {% if loja.loja_aberta %}{{ loja.horario_texto }}{% else %}Fechado para pedidos no momento{% endif %}
+  </p>
+</section>
+
+<div class="container">
+  <button type="button" class="linha-entrega" data-abrir="entrega-dialog">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.500 9.500a2.500 2.500 0 1 1 3.500 2.300c-.7.400-1 .9-1 1.700"/><circle cx="12" cy="16.800" r=".6"/></svg>
+    <span>Como você quer receber o pedido?</span>
+    <svg class="seta" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+  </button>
+
+  {% if promocoes %}
+  <section class="secao" aria-labelledby="t-promocoes">
+    <h2 id="t-promocoes" class="secao-titulo">Promoções</h2>
+    <div class="carrossel">
+      {% for p in promocoes %}{% include "partials/_card.html" %}{% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="secao" aria-labelledby="t-destaques">
+    <h2 id="t-destaques" class="secao-titulo">Em alta na Golden Bites</h2>
+    {% if destaques %}
+      <div class="carrossel">
+        {% for p in destaques %}{% include "partials/_card.html" %}{% endfor %}
+      </div>
+    {% else %}
+      <p class="vazio">Em breve, nossos queridinhos por aqui.</p>
+    {% endif %}
+    <div class="cta-centro">
+      <a class="btn btn-grande" href="{% url 'catalogo:catalogo' %}">Ver catálogo completo</a>
+    </div>
+  </section>
+</div>
+
+  <section class="manifesto" aria-labelledby="manifesto-titulo">
+    <div class="manifesto-conteudo container">
+    <p class="manifesto-chamada">Feitos para adoçar o seu dia</p>
+    <h2 id="manifesto-titulo">Um carinho em cada <em>mordida</em>.</h2>
+    <p class="manifesto-intro">Dos sacolés cremosos às trufas e brownies, escolha seu próximo momento favorito.</p>
+    {% if loja.sobre %}<p class="manifesto-sobre">{{ loja.sobre }}</p>{% endif %}
+    <div class="manifesto-fotos" role="group" aria-label="Nossos sacolés, brownies e trufas">
+      <figure class="manifesto-foto foto-sacoles">
+        <img src="{% static 'img/galeria-sacoles.webp' %}" alt="Sacolés cremosos de diferentes sabores com morangos frescos" width="1199" height="1145" loading="lazy" decoding="async">
+        <figcaption><span class="foto-numero">01</span>Sacolés cremosos</figcaption>
+      </figure>
+      <figure class="manifesto-foto foto-brownie">
+        <img src="{% static 'img/galeria-brownie.webp' %}" alt="Brownie de chocolate macio por dentro" width="720" height="1279" loading="lazy" decoding="async">
+        <figcaption><span class="foto-numero">02</span>Brownies artesanais</figcaption>
+      </figure>
+      <figure class="manifesto-foto foto-recheadas">
+        <img src="{% static 'img/galeria-trufas-recheadas.webp' %}" alt="Trufas de chocolate com diferentes recheios" width="736" height="920" loading="lazy" decoding="async">
+        <figcaption><span class="foto-numero">03</span>Trufas recheadas</figcaption>
+      </figure>
+      <figure class="manifesto-foto foto-trufas">
+        <img src="{% static 'img/galeria-trufas.webp' %}" alt="Trufas de chocolate decoradas, prontas para servir" width="1086" height="1448" loading="lazy" decoding="async">
+        <figcaption><span class="foto-numero">04</span>Trufas de chocolate</figcaption>
+      </figure>
+    </div>
+    <div class="manifesto-redes">
+      <p class="manifesto-redes-chamada">Siga a gente por lá!</p>
+      <p class="manifesto-redes-texto">Acompanhe no Instagram os novos sabores, lançamentos e outras surpresas que preparamos para você.</p>
+      <a class="manifesto-instagram" href="https://www.instagram.com/golden.bitesrj/" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.8" r=".7"/></svg>
+        <span><small>Instagram da Golden Bites</small><strong>@golden.bitesrj</strong></span>
+      </a>
+    </div>
+    </div>
+  </section>
+
+<dialog id="entrega-dialog" class="sheet" aria-labelledby="entrega-titulo">
+  <div class="sheet-topo">
+    <h2 id="entrega-titulo">Como você quer receber?</h2>
+    <button type="button" class="fechar" data-fechar aria-label="Fechar">×</button>
+  </div>
+  <div class="sheet-corpo">
+    <section class="modo">
+      <h3>Entrega rápida</h3>
+      <p>De bicicleta, para endereços até {{ loja.raio_rapida_km }} km da loja. A taxa depende da distância:</p>
+      {% include "partials/_taxas.html" %}
+    </section>
+    <section class="modo">
+      <h3>Entrega agendada</h3>
+      <p>Para endereços até {{ loja.raio_maximo_km }} km da loja. Você escolhe o dia e combinamos o horário pelo WhatsApp. Acima disso, ainda não entregamos.</p>
+    </section>
+    <a class="btn btn-bloco" href="{% url 'catalogo:catalogo' %}">Escolher meus itens</a>
+  </div>
+</dialog>
+{% endblock %}
+{% block agradecimento_rodape %}
+<section class="faq-rodape" aria-labelledby="faq-rodape-titulo">
+  <h2 class="faq-rodape-titulo" id="faq-rodape-titulo">Perguntas frequentes</h2>
+  <details>
+    <summary>Onde fica a loja e qual o horário de funcionamento?</summary>
+    <p class="faq-rodape-resposta">Estamos em {{ loja.cidade_texto }}. O horário informado pela equipe é {{ loja.horario_texto }}. O status no início da página mostra se estamos recebendo pedidos neste momento.</p>
+  </details>
+  <details>
+    <summary>Posso fazer encomendas para festas e eventos?</summary>
+    <p class="faq-rodape-resposta">Podemos verificar a disponibilidade. Fale com a gente com antecedência pelo {% if loja.whatsapp %}<a href="https://wa.me/{{ loja.whatsapp }}">WhatsApp</a>{% else %}WhatsApp da loja{% endif %} e informe a data, a quantidade e os sabores desejados.</p>
+  </details>
+  <details>
+    <summary>Como posso pagar?</summary>
+    <p class="faq-rodape-resposta">Você pode pagar com Pix ou cartão pelo ambiente seguro do Mercado Pago, durante a finalização do pedido.</p>
+  </details>
+  <details>
+    <summary>Vocês fazem entrega?</summary>
+    <p class="faq-rodape-resposta">Sim. A entrega rápida atende até {{ loja.raio_rapida_km }} km da loja e a agendada até {{ loja.raio_maximo_km }} km. Informe seu endereço no checkout para confirmar a cobertura e consultar a taxa.</p>
+  </details>
+  <details>
+    <summary>Como funciona o sistema de fidelidade?</summary>
+    {% if loja.fidelidade_ativa %}
+    <p class="faq-rodape-resposta">Os produtos informam quantos pontos valem. Os pontos são creditados após a confirmação do pagamento e podem ser trocados por produtos; a quantidade necessária aparece nos detalhes de cada item e na área Fidelidade.</p>
+    {% else %}
+    <p class="faq-rodape-resposta">O programa de fidelidade está temporariamente indisponível. Quando estiver ativo, as regras e os pontos serão exibidos nesta página e na área Fidelidade.</p>
+    {% endif %}
+  </details>
+</section>
+{% endblock %}

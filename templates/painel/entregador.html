@@ -1,0 +1,70 @@
+{% extends "painel/base.html" %}
+{% load static loja_tags %}
+{% block titulo %}Entrega {{ pedido.codigo }}{% endblock %}
+{% block conteudo %}
+<div class="p-barra">
+  <h1>Entrega {{ pedido.codigo }}</h1>
+  <a href="{% url 'painel:andamento' %}">Voltar</a>
+</div>
+
+<div class="p-grade-2">
+  <section class="p-caixa" id="entregador" data-url-posicao="{% url 'painel:entregador_posicao' pedido.codigo %}"
+           data-ativo="{% if pedido.status == 'saiu_entrega' %}1{% endif %}">
+    {% csrf_token %}
+    <h2>Cliente</h2>
+    <p><strong>{{ pedido.cliente.nome }}</strong><br>
+       <a href="https://wa.me/55{{ pedido.cliente.telefone }}" target="_blank" rel="noopener">WhatsApp {{ pedido.cliente.telefone }}</a></p>
+    <p>{{ pedido.endereco_completo }}</p>
+    {% if pedido.referencia %}<p class="p-nota">Referência: {{ pedido.referencia }}</p>{% endif %}
+    {% if pedido.modalidade == 'agendada' and pedido.data_agendada %}
+      <p class="p-nota">Agendado para {{ pedido.data_agendada|date:"d/m/Y" }}{% if pedido.horario_combinado %}, {{ pedido.horario_combinado }}{% endif %}</p>
+    {% endif %}
+    <p><a class="btn" href="{{ pedido.link_mapa }}" target="_blank" rel="noopener">Abrir no Google Maps</a></p>
+
+    <h2>Entrega</h2>
+    <p class="p-status s-{{ pedido.status }}">{{ pedido.get_status_display }}</p>
+    {% if pedido.prazo_entrega and pedido.status != 'entregue' %}
+    <div class="prazo-box" data-prazo="{{ pedido.prazo_entrega|date:'c' }}" data-modo="entregador">
+      <strong>Prazo: {{ pedido.prazo_entrega|date:"H:i" }}</strong> <span class="prazo-nota"></span>
+    </div>
+    {% endif %}
+    {% if pedido.status == 'pago' or pedido.status == 'em_preparo' %}
+      <form method="post" action="{% url 'painel:pedido_avancar' pedido.codigo %}" style="margin:12px 0">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.path }}">
+        <button type="submit" class="btn">{{ pedido.proximo.1 }}</button>
+      </form>
+    {% endif %}
+
+    {% if pedido.status == 'saiu_entrega' %}
+      <div class="confirmar-entrega" id="confirmar-entrega" data-url="{% url 'painel:entregador_confirmar' pedido.codigo %}">
+        <label for="codigo-entrega">Código de entrega do cliente</label>
+        <div class="confirmar-linha">
+          <input type="text" id="codigo-entrega" inputmode="numeric" pattern="[0-9]*" maxlength="4"
+                 autocomplete="off" placeholder="0000" aria-describedby="codigo-msg">
+          <button type="button" class="btn" id="confirmar">Confirmar entrega</button>
+        </div>
+        <p class="p-nota" id="codigo-msg">Peça ao cliente o código de 4 dígitos que aparece no pedido dele. Ao digitar o quarto número, a entrega é confirmada.</p>
+      </div>
+      <button type="button" class="btn" id="compartilhar">Compartilhar minha localização</button>
+      <p class="p-nota" id="estado-gps">O cliente só vê você no mapa depois que o compartilhamento começar.</p>
+      <p class="p-nota">Mantenha esta tela aberta durante a entrega.</p>
+    {% elif pedido.status == 'entregue' %}
+      <p class="p-nota">Pedido entregue.</p>
+    {% else %}
+      <p class="p-nota">Toque em “Saiu para entrega” quando sair. Depois o compartilhamento da localização começa aqui.</p>
+    {% endif %}
+  </section>
+
+  <div class="p-caixa p-chat-caixa">
+    {% url 'painel:entregador_chat' pedido.codigo as chat_lista %}
+    {% url 'painel:entregador_chat_enviar' pedido.codigo as chat_enviar %}
+    {% include "partials/_chat.html" with chat_lista=chat_lista chat_enviar=chat_enviar chat_autor="entregador" chat_titulo="Chat com o cliente" chat_vazio="Nenhuma mensagem ainda. Avise o cliente quando estiver chegando." %}
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'js/chat.js' %}"></script>
+<script src="{% static 'js/entregador.js' %}"></script>
+<script src="{% static 'js/prazo.js' %}"></script>
+{% endblock %}

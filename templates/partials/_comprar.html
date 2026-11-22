@@ -1,0 +1,15 @@
+{# "Adicionar" vira o controle de quantidade só depois do clique (e continua assim se o item já está no carrinho) #}
+<div class="comprar" data-comprar data-qtd="{{ qtd }}"
+     data-url-adicionar="{% url 'carrinho:adicionar' p.id %}" data-url-atualizar="{% url 'carrinho:atualizar' p.id %}">
+  <form method="post" action="{% url 'carrinho:adicionar' p.id %}" class="comprar-adicionar"{% if qtd %} hidden{% endif %}>
+    {% csrf_token %}
+    <input type="hidden" name="quantidade" value="1">
+    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+    <button class="btn btn-add" type="submit">Adicionar</button>
+  </form>
+  <div class="stepper stepper-card" role="group" aria-label="Quantidade de {{ p.nome }}"{% if not qtd %} hidden{% endif %}>
+    <button type="button" data-passo="-1" aria-label="Diminuir quantidade">−</button>
+    <output aria-live="polite">{{ qtd|default:1 }}</output>
+    <button type="button" data-passo="1" aria-label="Aumentar quantidade">+</button>
+  </div>
+</div>

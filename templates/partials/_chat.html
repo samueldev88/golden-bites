@@ -1,0 +1,11 @@
+<section class="chat" id="chat" data-url-lista="{{ chat_lista }}" data-url-enviar="{{ chat_enviar }}"
+         data-autor="{{ chat_autor }}" data-ativo="{% if pedido.chat_ativo %}1{% endif %}" data-vazio="{{ chat_vazio }}">
+  <h2>{{ chat_titulo }}</h2>
+  <div class="chat-mensagens" id="chat-mensagens" role="log" aria-live="polite" tabindex="0"></div>
+  <form class="chat-form" id="chat-form" autocomplete="off">
+    {% csrf_token %}
+    <input type="text" id="chat-texto" name="texto" maxlength="500" placeholder="Escreva uma mensagem…" aria-label="Mensagem">
+    <button type="submit" class="btn" id="chat-enviar">Enviar</button>
+  </form>
+  <p class="chat-aviso" id="chat-aviso" role="status" hidden></p>
+</section>

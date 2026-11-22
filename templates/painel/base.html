@@ -1,0 +1,105 @@
+{% load static loja_tags %}<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>{% block titulo %}Painel{% endblock %} · {{ loja.nome }}</title>
+  <link rel="icon" href="{% static 'img/favicon.png' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/painel.css' %}?v=20261122-1">
+</head>
+<body>
+  {% with rota=request.resolver_match.url_name %}
+  <header class="p-topo">
+    <a class="p-marca" href="{% url 'painel:dashboard' %}" aria-label="Painel — início" title="Painel">
+      <img src="{% static 'img/logo-golden-bites.png' %}?v=20261120-2" alt="" width="40" height="40">
+      <span>Painel</span>
+    </a>
+    <button class="p-menu-toggle" type="button" aria-label="Abrir menu do painel" aria-controls="p-nav" aria-expanded="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <nav class="p-nav" id="p-nav" aria-label="Navegação do painel">
+      <a href="{% url 'painel:dashboard' %}"{% if rota == 'dashboard' %} class="ativo" aria-current="page"{% endif %} aria-label="Início" title="Início">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3.5 10 8.5-7 8.5 7"/><path d="M5.5 9.5V20h13V9.5M9.5 20v-6h5v6"/></svg><span class="p-nav-label">Início</span>
+      </a>
+      <a href="{% url 'painel:andamento' %}"{% if rota == 'andamento' %} class="ativo" aria-current="page"{% endif %} aria-label="Em andamento" title="Em andamento">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg><span class="p-nav-label">Em andamento</span>
+      </a>
+      <a href="{% url 'painel:pedidos' %}"{% if rota == 'pedidos' or rota == 'pedido_detalhe' %} class="ativo" aria-current="page"{% endif %} aria-label="Pedidos" title="Pedidos">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h8l4 4V20H6z"/><path d="M14 3.5v4h4M9 12h6M9 16h6"/></svg><span class="p-nav-label">Pedidos</span>
+      </a>
+      <a href="{% url 'painel:produtos_lista' %}"{% if 'produtos' in rota or 'categorias' in rota %} class="ativo" aria-current="page"{% endif %} aria-label="Produtos" title="Produtos">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8.5 4.5L12 12 3.5 7.5 12 3Z"/><path d="M3.5 7.5V17L12 21l8.5-4V7.5M12 12v9"/></svg><span class="p-nav-label">Produtos</span>
+      </a>
+      <a href="{% url 'painel:relatorios' %}"{% if rota == 'relatorios' or 'lancamentos' in rota %} class="ativo" aria-current="page"{% endif %} aria-label="Relatórios" title="Relatórios">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16M6.5 16v-5M11.5 16V5M16.5 16V8"/></svg><span class="p-nav-label">Relatórios</span>
+      </a>
+      <a href="{% url 'painel:avaliacoes' %}"{% if rota == 'avaliacoes' %} class="ativo" aria-current="page"{% endif %} aria-label="Avaliações" title="Avaliações">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"/></svg><span class="p-nav-label">Avaliações</span>
+      </a>
+      <a href="{% url 'painel:clientes_lista' %}"{% if 'clientes' in rota %} class="ativo" aria-current="page"{% endif %} aria-label="Clientes" title="Clientes">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M16 5.5a3 3 0 0 1 0 5.8M17 14a5 5 0 0 1 3.5 5"/></svg><span class="p-nav-label">Clientes</span>
+      </a>
+      <a href="{% url 'painel:fidelidade' %}"{% if rota == 'fidelidade' %} class="ativo" aria-current="page"{% endif %} aria-label="Fidelidade" title="Fidelidade">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"/></svg><span class="p-nav-label">Fidelidade</span>
+      </a>
+      <a href="{% url 'painel:entregas' %}"{% if rota == 'entregas' or 'faixas' in rota or 'bairros' in rota %} class="ativo" aria-current="page"{% endif %} aria-label="Entregas" title="Entregas">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h11v11H3zM14 10h4l3 3v4h-7z"/><circle cx="7.5" cy="18" r="1.8"/><circle cx="17.5" cy="18" r="1.8"/></svg><span class="p-nav-label">Entregas</span>
+      </a>
+      <a href="{% url 'painel:cupons_lista' %}"{% if 'cupons' in rota %} class="ativo" aria-current="page"{% endif %} aria-label="Cupons" title="Cupons">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4V6Z"/><path d="M12 8.5v1M12 12v1M12 15.5v.1"/></svg><span class="p-nav-label">Cupons</span>
+      </a>
+      <a href="{% url 'painel:configuracao' %}"{% if rota == 'configuracao' %} class="ativo" aria-current="page"{% endif %} aria-label="Loja" title="Loja">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10h16v10H4zM3 10l2-6h14l2 6M9 20v-6h6v6"/></svg><span class="p-nav-label">Loja</span>
+      </a>
+    </nav>
+    <div class="p-conta">
+      <a href="{% url 'catalogo:home' %}" target="_blank" rel="noopener" aria-label="Ver loja" title="Ver loja">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 13v6H5V6h6"/></svg><span>Ver loja</span>
+      </a>
+      <form method="post" action="{% url 'painel:logout' %}">{% csrf_token %}
+        <button type="submit" aria-label="Sair" title="Sair"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H5v16h5M14 8l4 4-4 4M8 12h10"/></svg><span>Sair</span></button>
+      </form>
+    </div>
+  </header>
+  {% endwith %}
+  <div class="p-scrim" data-painel-fechar></div>
+
+  <main class="p-main">
+    {% for m in messages %}<p class="p-msg {{ m.tags }}" role="status">{{ m.message }}</p>{% endfor %}
+    {% block conteudo %}{% endblock %}
+  </main>
+  <script nonce="{{ request.csp_nonce }}">
+    (() => {
+      const botao = document.querySelector(".p-menu-toggle");
+      const nav = document.querySelector(".p-nav");
+      const fundo = document.querySelector(".p-scrim");
+      if (!botao || !nav || !fundo) return;
+      const definirAberto = (aberto, devolverFoco = false) => {
+        nav.classList.toggle("aberto", aberto);
+        fundo.classList.toggle("aberto", aberto);
+        botao.setAttribute("aria-expanded", String(aberto));
+        botao.setAttribute("aria-label", aberto ? "Fechar menu do painel" : "Abrir menu do painel");
+        document.body.classList.toggle("p-menu-aberto", aberto);
+        if (aberto) {
+          const primeiroLink = nav.querySelector("a");
+          if (primeiroLink) primeiroLink.focus();
+        }
+        if (devolverFoco) botao.focus();
+      };
+      botao.addEventListener("click", () => definirAberto(botao.getAttribute("aria-expanded") !== "true"));
+      fundo.addEventListener("click", () => definirAberto(false, true));
+      nav.addEventListener("click", (evento) => {
+        if (evento.target.closest("a")) definirAberto(false, true);
+      });
+      document.addEventListener("keydown", (evento) => {
+        if (evento.key === "Escape" && botao.getAttribute("aria-expanded") === "true") definirAberto(false, true);
+      });
+    })();
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,12 @@
+{% load static %}
+{% if pedido.status == 'saiu_entrega' %}
+<section class="bloco rastreio" aria-labelledby="rastreio-titulo">
+  <h2 id="rastreio-titulo">Seu pedido está a caminho</h2>
+  <p class="ajuda" id="rastreio-msg" role="status" aria-live="polite">Procurando o entregador…</p>
+  <div id="rastreio"
+       data-url="{% url 'pedidos:posicao' pedido.codigo %}"
+       {% if pedido.destino_lat is not None %}data-lat="{{ pedido.destino_lat|stringformat:'.6f' }}" data-lon="{{ pedido.destino_lon|stringformat:'.6f' }}"{% endif %}
+       style="height:18rem;border-radius:.75rem;overflow:hidden" hidden></div>
+</section>
+<script src="{% static 'js/rastreio.js' %}" defer></script>
+{% endif %}

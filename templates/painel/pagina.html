@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load static loja_tags %}
+{% block titulo %}Fidelidade · {{ loja.nome }}{% endblock %}
+{% block cabecalho %}Fidelidade{% endblock %}
+{% block content %}
+<div class="container">
+  {% if not config.fidelidade_ativa %}
+    <div class="estado-vazio">
+      <h2>Programa de fidelidade em breve</h2>
+      <p>Estamos preparando uma novidade para você.</p>
+      <a class="btn" href="{% url 'catalogo:catalogo' %}">Ver catálogo</a>
+    </div>
+  {% else %}
+    <div class="fid-coluna">
+      <section class="fid-hero">
+        <p class="fid-eyebrow">Programa de fidelidade</p>
+        <h2>Cada item que você pede vale pontos.</h2>
+        <p>Sem cadastro e sem senha: seu cartão fica ligado ao seu WhatsApp e ao seu aparelho.</p>
+      </section>
+
+      {% if cliente %}
+      {% include "partials/_cartao.html" with bloqueado=False pontos=resultado.saldo %}
+      <button type="button" id="ativar-movimento" class="link-discreto fid-movimento" hidden>Ativar movimento do cartão</button>
+      <p class="fid-dica">Passe o dedo ou o mouse sobre o cartão e toque nele para virar.</p>
+
+      <section class="fid-card" aria-live="polite">
+        {% if reservados %}
+          <p class="nota">{{ reservados }} ponto{{ reservados|pluralize }} reservado{{ reservados|pluralize }} no seu carrinho · {{ livres }} livre{{ livres|pluralize }}</p>
+        {% endif %}
+        {% if resultado.resgates %}
+          <p class="fid-msg ok">Você já pode trocar pontos por um dos itens abaixo.</p>
+        {% else %}
+          <p class="fid-msg">Faltam <strong>{{ resultado.faltam }}</strong> ponto{{ resultado.faltam|pluralize }} para a sua próxima troca.</p>
+        {% endif %}
+        <form method="post" action="{% url 'fidelidade:sair' %}" class="fid-sair">
+          {% csrf_token %}
+          WhatsApp final {{ final_telefone }} · <button type="submit" class="link-discreto">Não é você? Sair deste aparelho</button>
+        </form>
+      </section>
+      {% else %}
+      {% include "partials/_cartao.html" with bloqueado=True pontos=0 %}
+      <section class="fid-card fid-aparelho">
+        <h3>Seus pontos aparecem no seu cartão</h3>
+        <p>Depois do seu primeiro pedido pago, o cartão é criado neste aparelho, com o seu saldo e um código de recuperação. Assim ninguém consegue usar os seus pontos.</p>
+        <details>
+          <summary>Já tem cartão em outro aparelho?</summary>
+          <p class="nota">Abra o seu cartão no outro aparelho, vire para ver o <strong>código de recuperação</strong> e digite abaixo. Perdeu o código? Fale com a loja e ela envia um código novo.</p>
+          <form method="post" action="{% url 'fidelidade:vincular' %}" class="fid-vinculo">
+            {% csrf_token %}
+            <div class="campo"><label for="vinc-tel">Seu WhatsApp</label>
+              <input type="text" id="vinc-tel" name="telefone" inputmode="tel" autocomplete="tel" placeholder="(21) 99999-9999" required></div>
+            <div class="campo"><label for="vinc-cod">Código de recuperação</label>
+              <input type="text" id="vinc-cod" name="codigo" autocapitalize="characters" autocomplete="off" maxlength="12" placeholder="ABCDE-FGHIJ" required></div>
+            <button type="submit" class="btn btn-bloco">Confirmar este aparelho</button>
+          </form>
+          {% if loja.whatsapp %}<p class="nota" style="margin-top:12px">Perdeu o código? <a href="https://wa.me/{{ loja.whatsapp }}?text=Ol%C3%A1!%20Perdi%20o%20c%C3%B3digo%20do%20meu%20cart%C3%A3o%20de%20fidelidade.">Falar com a loja no WhatsApp</a></p>{% endif %}
+        </details>
+      </section>
+      {% endif %}
+    </div>
+
+    <section class="secao" aria-labelledby="t-troca">
+      <h2 id="t-troca" class="secao-titulo">Troque seus pontos</h2>
+      {% if produtos %}
+        <div class="grade">
+          {% for item in produtos %}{% include "partials/_card_troca.html" with item=item p=item.produto %}{% endfor %}
+        </div>
+      {% else %}
+        <p class="vazio">Em breve, os itens que valem pontos aparecem aqui.</p>
+      {% endif %}
+    </section>
+
+    <section class="secao fid-coluna">
+      <h2 class="secao-titulo">Como funciona</h2>
+      <ol class="fid-passos">
+        <li><strong>Peça e pague.</strong> Os pontos de cada item entram quando o pagamento é confirmado.</li>
+        <li><strong>Use sempre o mesmo WhatsApp</strong> para somar os seus pontos.</li>
+        <li><strong>Escolha o item e toque em “Trocar pontos”.</strong> Ele entra no carrinho sem custo, e os pontos só saem do seu saldo quando você finaliza o pedido.</li>
+        <li><strong>Entrega rápida atrasou?</strong> Você ganha 1 ponto a cada 5 minutos além da previsão.</li>
+      </ol>
+      <p class="nota">Pedidos cancelados não geram pontos, e os pontos de uma troca voltam para você se o pedido for cancelado.</p>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/fidelidade.js' %}" defer></script>{% endblock %}

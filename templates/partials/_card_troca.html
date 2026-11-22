@@ -1,0 +1,20 @@
+{% load static loja_tags %}
+<article class="produto troca{% if item.estado != 'ok' %} bloqueado{% endif %}">
+  <a class="produto-foto" href="{% url 'catalogo:produto' p.slug %}" aria-label="Ver detalhes de {{ p.nome }}">
+    {% include "partials/_galeria.html" with p=p modo="card" %}
+    <span class="selo">Vale {{ p.pontos }} ponto{{ p.pontos|pluralize }}</span>
+  </a>
+  <div class="produto-corpo">
+    <h3><a href="{% url 'catalogo:produto' p.slug %}">{{ p.nome }}</a></h3>
+    {% if p.descricao %}<p class="produto-desc">{{ p.descricao|truncatechars:72 }}</p>{% endif %}
+    <p class="custo-troca"><strong>{{ item.custo }}</strong> ponto{{ item.custo|pluralize }}<span> · valor {{ p.preco_final|brl }}</span></p>
+    {% if item.estado == 'ok' %}
+      <form method="post" action="{% url 'carrinho:trocar' p.id %}">
+        {% csrf_token %}
+        <button class="btn btn-add btn-bloco" type="submit">Trocar pontos</button>
+      </form>
+    {% else %}
+      <button class="btn btn-add btn-bloco" type="button" disabled>{{ item.rotulo }}</button>
+    {% endif %}
+  </div>
+</article>

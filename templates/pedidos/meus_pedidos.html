@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load static loja_tags %}
+{% block titulo %}Meus pedidos · {{ loja.nome }}{% endblock %}
+{% block cabecalho %}Meus pedidos{% endblock %}
+{% block content %}
+<div class="container estreito">
+  {% if pedidos %}
+    <ul class="lista-pedidos">
+      {% for p in pedidos %}
+      <li>
+        <a href="{% url 'pedidos:detalhe' p.codigo %}">
+          <div>
+            <strong>{{ p.codigo }}</strong>
+            <span class="nota">{{ p.criado_em|date:"d/m/Y H:i" }}</span>
+          </div>
+          <div class="lado">
+            <span class="status-pedido s-{{ p.status }}">{{ p.get_status_display }}</span>
+            <strong>{{ p.total|brl }}</strong>
+          </div>
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="estado-vazio">
+      <h2>Você ainda não fez pedidos neste aparelho</h2>
+      <p>Seus pedidos aparecem aqui para você acompanhar.</p>
+      <a class="btn" href="{% url 'catalogo:catalogo' %}">Ver catálogo</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

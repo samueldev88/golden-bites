@@ -1,0 +1,91 @@
+{% extends "painel/base.html" %}
+{% load loja_tags %}
+{% block titulo %}Relatórios{% endblock %}
+{% block conteudo %}
+<div class="p-barra">
+  <h1>Relatórios</h1>
+  <span class="p-atalhos">
+    <a href="{% url 'painel:lancamentos_lista' %}">Entradas e saídas</a>
+    <a class="btn" href="{% url 'painel:lancamentos_novo' %}">Novo lançamento</a>
+    <a href="{% url 'painel:relatorio_exportar' %}?de={{ de }}&amp;ate={{ ate }}">Exportar CSV</a>
+  </span>
+</div>
+
+<div class="p-filtros">
+  {% for valor, nome in presets %}<a href="?periodo={{ valor }}" class="{% if preset_ativo == valor %}ativo{% endif %}">{{ nome }}</a>{% endfor %}
+  <form method="get" class="p-periodo">
+    <input type="date" name="de" value="{{ de }}" aria-label="De">
+    <input type="date" name="ate" value="{{ ate }}" aria-label="Até">
+    <button class="btn" type="submit">Filtrar</button>
+  </form>
+</div>
+<p class="p-nota">Período: {{ inicio|date:"d/m/Y" }} a {{ fim|date:"d/m/Y" }}. Os pedidos entram no relatório na data em que o pagamento foi confirmado.</p>
+
+<div class="p-cartoes">
+  <div class="p-cartao ent"><span>Entradas</span><strong>{{ entradas_total|brl }}</strong><small>Pedidos {{ entradas_pedidos|brl }} · avulsas {{ entradas_avulsas|brl }}</small></div>
+  <div class="p-cartao sai"><span>Saídas</span><strong>{{ saidas_total|brl }}</strong></div>
+  {% if saldo < 0 %}
+  <div class="p-cartao alerta"><span>Saldo</span><strong>{{ saldo|brl }}</strong></div>
+  {% else %}
+  <div class="p-cartao"><span>Saldo</span><strong>{{ saldo|brl }}</strong></div>
+  {% endif %}
+  <div class="p-cartao"><span>Pedidos pagos</span><strong>{{ n_pedidos }}</strong><small>Ticket médio {{ ticket_medio|brl }}</small></div>
+</div>
+
+<section class="p-caixa">
+  <h2>Entradas e saídas no período</h2>
+  <div class="p-legenda"><span class="ent">Entradas</span><span class="sai">Saídas</span></div>
+  <div class="p-grafico" role="img" aria-label="Gráfico de entradas e saídas por período">
+    {% for b in barras %}
+    <div class="p-barra-grupo" title="{{ b.rotulo }}: entradas {{ b.entrada|brl }} · saídas {{ b.saida|brl }}">
+      <div class="p-barra-par">
+        <span class="p-col ent" data-h="{{ b.h_ent }}"></span>
+        <span class="p-col sai" data-h="{{ b.h_sai }}"></span>
+      </div>
+      <small>{{ b.rotulo }}</small>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<div class="p-grade-2">
+  <section class="p-caixa">
+    <h2>Produtos mais vendidos</h2>
+    {% if top_produtos %}
+    <table>
+      <thead><tr><th>Produto</th><th>Qtd.</th><th>Receita</th></tr></thead>
+      <tbody>{% for r in top_produtos %}<tr><td>{{ r.nome }}</td><td>{{ r.qtd }}</td><td>{{ r.receita|brl }}</td></tr>{% endfor %}</tbody>
+    </table>
+    {% else %}<p class="p-vazio">Sem vendas no período.</p>{% endif %}
+  </section>
+
+  <section class="p-caixa">
+    <h2>Resumo das vendas</h2>
+    <p class="p-linha"><span>Taxas de entrega recebidas</span><span>{{ taxas_entrega|brl }}</span></p>
+    <p class="p-linha"><span>Descontos concedidos (cupons e fidelidade)</span><span>{{ descontos|brl }}</span></p>
+    <p class="p-linha"><span>Pedidos cancelados</span><span>{{ cancelados }}</span></p>
+    <h2>Por forma de pagamento</h2>
+    {% for r in por_pagamento %}<p class="p-linha"><span>{{ r.rotulo }} ({{ r.n }})</span><span>{{ r.total|brl }}</span></p>{% empty %}<p class="p-vazio">Sem dados.</p>{% endfor %}
+    <h2>Por tipo de entrega</h2>
+    {% for r in por_modalidade %}<p class="p-linha"><span>{{ r.rotulo }} ({{ r.n }})</span><span>{{ r.total|brl }}</span></p>{% empty %}<p class="p-vazio">Sem dados.</p>{% endfor %}
+  </section>
+</div>
+
+<div class="p-grade-2">
+  <section class="p-caixa">
+    <h2>Saídas por categoria</h2>
+    {% for r in saidas_por_categoria %}<p class="p-linha"><span>{{ r.rotulo }}</span><span>{{ r.total|brl }}</span></p>{% empty %}<p class="p-vazio">Nenhuma saída lançada. <a href="{% url 'painel:lancamentos_novo' %}">Registrar uma saída</a></p>{% endfor %}
+  </section>
+  <section class="p-caixa">
+    <h2>Lançamentos do período</h2>
+    {% for l in lancamentos %}
+      <p class="p-linha"><span>{{ l.data|date:"d/m" }} · {{ l.descricao }}</span><span class="{% if l.tipo == 'saida' %}neg{% else %}pos{% endif %}">{% if l.tipo == 'saida' %}-{% endif %}{{ l.valor|brl }}</span></p>
+    {% empty %}<p class="p-vazio">Nenhum lançamento manual.</p>{% endfor %}
+  </section>
+</div>
+<script nonce="{{ request.csp_nonce }}">
+  document.querySelectorAll("[data-h]").forEach(function (el) {
+    el.style.height = el.dataset.h + "%";
+  });
+</script>
+{% endblock %}

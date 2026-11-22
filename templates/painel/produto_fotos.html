@@ -1,0 +1,44 @@
+{% extends "painel/base.html" %}
+{% load static %}
+{% block titulo %}Fotos de {{ produto.nome }}{% endblock %}
+{% block conteudo %}
+<div class="p-barra">
+  <h1>Fotos: {{ produto.nome }}</h1>
+  <a href="{% url 'painel:produtos_lista' %}">Voltar aos produtos</a>
+</div>
+<p class="p-nota">A <strong>capa</strong> é a foto que você escolhe em "Editar" o produto. As fotos abaixo passam sozinhas, a cada 3 segundos, depois da capa.
+  Até {{ maximo }} fotos extras. Elas são reduzidas e otimizadas automaticamente para o site carregar rápido.</p>
+
+<form method="post" enctype="multipart/form-data" class="p-form" style="margin-bottom:18px">
+  {% csrf_token %}
+  <div class="campo">
+    <label for="fotos">Adicionar fotos (pode escolher várias de uma vez)</label>
+    <input type="file" id="fotos" name="fotos" accept="image/*" multiple required>
+  </div>
+  <button class="btn" type="submit">Enviar fotos</button>
+</form>
+
+<div class="p-fotos">
+  {% if produto.foto %}
+  <figure class="p-foto capa">
+    <img src="{{ produto.foto.url }}" alt="Capa de {{ produto.nome }}">
+    <figcaption><strong>Capa</strong> · aparece primeiro</figcaption>
+  </figure>
+  {% endif %}
+  {% for f in fotos %}
+  <figure class="p-foto">
+    <img src="{{ f.imagem.url }}" alt="Foto {{ forloop.counter }} de {{ produto.nome }}">
+    <figcaption>
+      <span>Foto {{ forloop.counter }}</span>
+      <span class="p-foto-acoes">
+        <form method="post" action="{% url 'painel:foto_mover' f.pk 'subir' %}">{% csrf_token %}<button type="submit" class="p-chave" aria-label="Mover para antes"{% if forloop.first %} disabled{% endif %}>◀</button></form>
+        <form method="post" action="{% url 'painel:foto_mover' f.pk 'descer' %}">{% csrf_token %}<button type="submit" class="p-chave" aria-label="Mover para depois"{% if forloop.last %} disabled{% endif %}>▶</button></form>
+        <form method="post" action="{% url 'painel:foto_remover' f.pk %}" onsubmit="return confirm('Remover esta foto?')">{% csrf_token %}<button type="submit" class="p-chave perigo">Remover</button></form>
+      </span>
+    </figcaption>
+  </figure>
+  {% empty %}
+  {% if not produto.foto %}<p class="p-vazio">Este produto ainda não tem fotos.</p>{% endif %}
+  {% endfor %}
+</div>
+{% endblock %}

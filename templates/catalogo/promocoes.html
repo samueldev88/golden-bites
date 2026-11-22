@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block titulo %}Promoções · {{ loja.nome }}{% endblock %}
+{% block cabecalho %}Promoções{% endblock %}
+{% block content %}
+<div class="container">
+  {% if produtos %}
+    <h2 class="secao-titulo">Preços especiais</h2>
+    <div class="grade">{% for p in produtos %}{% include "partials/_card.html" %}{% endfor %}</div>
+  {% else %}
+    <div class="estado-vazio">
+      <h2>Nenhuma promoção por enquanto</h2>
+      <p>Quando houver preços especiais, eles aparecem aqui.</p>
+      <a class="btn" href="{% url 'catalogo:catalogo' %}">Ver catálogo</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

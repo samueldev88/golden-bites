@@ -1,0 +1,8 @@
+{% load static %}
+<div class="galeria" data-galeria="{{ modo|default:'card' }}">
+  {% for url in p.galeria %}
+    <img src="{{ url }}" alt="{% if forloop.first %}{{ p.nome }}{% endif %}" class="{% if forloop.first %}ativa{% endif %}"{% if not forloop.first %} loading="lazy"{% endif %} width="480" height="360" draggable="false">
+  {% empty %}
+    <img src="{% static 'img/sem-foto.svg' %}" alt="{{ p.nome }}" class="ativa" width="480" height="360">
+  {% endfor %}
+</div>

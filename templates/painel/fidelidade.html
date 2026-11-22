@@ -1,0 +1,46 @@
+{% extends "painel/base.html" %}
+{% block titulo %}Fidelidade{% endblock %}
+{% block conteudo %}
+<div class="p-barra">
+  <h1>Fidelidade</h1>
+  <a href="{% url 'painel:configuracao' %}">Ajustar regras do programa</a>
+</div>
+<p class="p-nota">Cada item pago vale pontos (definidos em cada produto). Com {{ meta }} pontos, ou o custo definido no produto, o cliente troca por um item grátis na aba Fidelidade do site. O saldo só aparece em aparelhos de confiança. Para mudar de aparelho, o próprio cliente pode gerar um código temporário no verso do cartão ou usar o código de recuperação. Use “Gerar código” abaixo apenas se ele perdeu o aparelho antigo e o código de recuperação; confirme a identidade antes de enviar.</p>
+{% if clientes %}
+<div class="p-tabela">
+  <table>
+    <thead><tr><th>Cliente</th><th>WhatsApp</th><th>Pontos</th><th>Trocas</th><th>Aparelhos</th><th>Segurança</th><th>Ajuste manual</th></tr></thead>
+    <tbody>
+      {% for c in clientes %}
+      <tr>
+        <td>{{ c.nome }}</td>
+        <td>{{ c.telefone }}</td>
+        <td><strong>{{ c.pontos }}</strong></td>
+        <td>{{ c.trocas }}</td>
+        <td>{{ c.aparelhos }}</td>
+        <td>
+          <form method="post" action="{% url 'painel:fidelidade_vinculo' c.pk %}" class="p-promo">{% csrf_token %}
+            <button type="submit" class="p-chave" title="Gera um código de 6 dígitos para o cliente ligar um novo aparelho">Gerar código</button>
+          </form>
+          {% if c.aparelhos %}
+          <form method="post" action="{% url 'painel:fidelidade_remover_aparelhos' c.pk %}" class="p-promo" onsubmit="return confirm('Desligar todos os aparelhos de {{ c.nome|escapejs }}?')">{% csrf_token %}
+            <button type="submit" class="p-chave">Desligar aparelhos</button>
+          </form>
+          {% endif %}
+        </td>
+        <td>
+          <form method="post" action="{% url 'painel:fidelidade_ajuste' c.pk %}" class="p-promo">{% csrf_token %}
+            <input type="text" name="pontos" inputmode="numeric" placeholder="+1 ou -8" size="6" aria-label="Pontos para {{ c.nome }}">
+            <input type="text" name="observacao" placeholder="Motivo" size="14" aria-label="Motivo do ajuste">
+            <button type="submit" class="p-chave">Aplicar</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="p-vazio">Os clientes aparecem aqui depois do primeiro pedido.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "painel/base.html" %}
+{% load loja_tags %}
+{% block titulo %}Início{% endblock %}
+{% block conteudo %}
+<h1>Visão geral</h1>
+<div class="p-cartoes">
+  <div class="p-cartao"><span>Pedidos hoje</span><strong>{{ pedidos_hoje }}</strong></div>
+  <a class="p-cartao" href="{% url 'painel:relatorios' %}?periodo=hoje"><span>Entradas hoje</span><strong>{{ entradas_hoje|brl }}</strong></a>
+  <a class="p-cartao{% if aguardando_confirmacao %} alerta{% endif %}" href="{% url 'painel:pedidos' %}?status=aguardando_confirmacao">
+    <span>Taxa a confirmar</span><strong>{{ aguardando_confirmacao }}</strong>
+  </a>
+  <a class="p-cartao" href="{% url 'painel:entregas' %}"><span>Em andamento</span><strong>{{ em_andamento }}</strong></a>
+  <a class="p-cartao" href="{% url 'painel:relatorios' %}?periodo=mes"><span>Vendas no mês</span><strong>{{ vendas_mes|brl }}</strong></a>
+</div>
+
+<div class="p-barra"><h2>Últimos pedidos</h2><a href="{% url 'painel:pedidos' %}">Ver todos</a></div>
+{% include "painel/_tabela_pedidos.html" with pedidos=recentes %}
+{% endblock %}

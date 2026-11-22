@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static loja_tags %}
+{% block titulo %}{{ p.nome }} · {{ loja.nome }}{% endblock %}
+{% block cabecalho %}Detalhes{% endblock %}
+{% block content %}
+{% with qtd=carrinho_mapa|no_carrinho:p.id %}
+<div class="container detalhe-produto">
+  <a class="voltar" href="{% url 'catalogo:catalogo' %}">← Voltar ao catálogo</a>
+  <div class="detalhe-grade">
+    <div class="detalhe-fotos">
+      {% include "partials/_galeria.html" with p=p modo="detalhe" %}
+      {% if not p.disponivel %}<span class="selo selo-off">Indisponível</span>
+      {% elif p.em_promocao %}<span class="selo selo-promo">-{{ p.desconto_percentual }}%</span>
+      {% elif p.destaque %}<span class="selo">Em alta</span>{% endif %}
+    </div>
+    <div class="detalhe-info">
+      {% if p.categoria %}<p class="detalhe-cat">{{ p.categoria }}</p>{% endif %}
+      <h2 class="detalhe-nome">{{ p.nome }}</h2>
+      <p class="preco preco-grande">{% if p.em_promocao %}<s>{{ p.preco|brl }}</s>{% endif %}<strong>{{ p.preco_final|brl }}</strong></p>
+      {% if loja.fidelidade_ativa and p.pontos %}<p class="detalhe-pontos">Vale {{ p.pontos }} ponto{{ p.pontos|pluralize }} de fidelidade</p>{% endif %}
+      {% if p.descricao %}<div class="detalhe-desc">{{ p.descricao|linebreaks }}</div>{% endif %}
+      <div class="detalhe-compra">
+        {% if p.disponivel %}{% include "partials/_comprar.html" with p=p qtd=qtd %}
+        {% else %}<p class="aviso">Este item está indisponível no momento.</p>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <section class="avaliacoes-produto" aria-labelledby="titulo-avaliacoes">
+    <div class="avaliacoes-produto-topo">
+      <div>
+        <h2 id="titulo-avaliacoes">Avaliações de quem comprou</h2>
+        <p>Opiniões de clientes com compra verificada.</p>
+      </div>
+      {% if total_avaliacoes %}
+      <p class="avaliacoes-produto-media"><strong>{{ media_avaliacoes|floatformat:1 }}</strong> / 5 <span aria-label="média das avaliações">★</span><small>{{ total_avaliacoes }} avaliação{{ total_avaliacoes|pluralize }}</small></p>
+      {% endif %}
+    </div>
+    {% for avaliacao in avaliacoes %}
+    <article class="avaliacao-publica">
+      <div class="avaliacao-publica-topo">
+        <strong class="avaliacao-publica-estrelas" aria-label="{{ avaliacao.nota }} de 5 estrelas">{{ avaliacao.estrelas }}</strong>
+        <strong>{{ avaliacao.nome_publico }}</strong>
+        <span class="avaliacao-verificada">Compra verificada</span>
+        <time datetime="{{ avaliacao.criado_em|date:'c' }}">{{ avaliacao.criado_em|date:"d/m/Y" }}</time>
+      </div>
+      <p>{{ avaliacao.comentario }}</p>
+    </article>
+    {% empty %}
+    <p class="vazio">Este produto ainda não recebeu avaliações.</p>
+    {% endfor %}
+    {% if pagina_avaliacoes.has_other_pages %}
+    <nav class="avaliacoes-paginacao" aria-label="Paginação das avaliações">
+      {% if pagina_avaliacoes.has_previous %}<a class="btn" href="?avaliacao_pagina={{ pagina_avaliacoes.previous_page_number }}#titulo-avaliacoes">Anteriores</a>{% endif %}
+      <span>Página {{ pagina_avaliacoes.number }} de {{ pagina_avaliacoes.paginator.num_pages }}</span>
+      {% if pagina_avaliacoes.has_next %}<a class="btn" href="?avaliacao_pagina={{ pagina_avaliacoes.next_page_number }}#titulo-avaliacoes">Próximas</a>{% endif %}
+    </nav>
+    {% endif %}
+  </section>
+
+  {% if relacionados %}
+  <section class="secao" aria-labelledby="t-relacionados">
+    <h2 id="t-relacionados" class="secao-titulo">Você também pode gostar</h2>
+    <div class="carrossel">
+      {% for p in relacionados %}{% include "partials/_card.html" %}{% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</div>
+{% endwith %}
+{% endblock %}

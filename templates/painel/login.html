@@ -1,0 +1,24 @@
+{% load static %}<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Entrar · Painel</title>
+  <link rel="icon" href="{% static 'img/favicon.png' %}">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/painel.css' %}">
+</head>
+<body class="p-login">
+  <form method="post" class="p-login-card">
+    {% csrf_token %}
+    <img src="{% static 'img/logo-golden-bites.png' %}?v=20261120-2" alt="Golden Bites" width="120" height="120">
+    <h1>Entrar no painel</h1>
+    {% for erro in form.non_field_errors %}<p class="p-msg error" role="alert">{{ erro }}</p>{% endfor %}
+    <div class="campo"><label for="id_username">Usuário</label>{{ form.username }}</div>
+    <div class="campo"><label for="id_password">Senha</label>{{ form.password }}</div>
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit" class="btn">Entrar</button>
+  </form>
+</body>
+</html>

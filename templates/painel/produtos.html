@@ -1,0 +1,52 @@
+{% extends "painel/base.html" %}
+{% load static loja_tags %}
+{% block titulo %}Produtos{% endblock %}
+{% block conteudo %}
+<div class="p-barra">
+  <h1>Produtos</h1>
+  <span class="p-atalhos">
+    <a href="{% url 'painel:categorias_lista' %}">Categorias</a>
+    <a class="btn" href="{{ url_novo }}">Adicionar produto</a>
+  </span>
+</div>
+{% if object_list %}
+<div class="p-tabela">
+  <table>
+    <thead><tr><th>Foto</th><th>Produto</th><th>Preço</th><th>Disponível</th><th>Em alta</th><th>Promoção</th><th></th></tr></thead>
+    <tbody>
+      {% for p in object_list %}
+      <tr>
+        <td><img class="p-mini" src="{% if p.foto %}{{ p.foto.url }}{% else %}{% static 'img/sem-foto.svg' %}{% endif %}" alt="" width="56" height="56"></td>
+        <td><strong>{{ p.nome }}</strong><br><small>{{ p.categoria|default:"Sem categoria" }} · {{ p.pontos }} pt</small></td>
+        <td>{% if p.em_promocao %}<s>{{ p.preco|brl }}</s><br><strong>{{ p.preco_final|brl }}</strong>{% else %}{{ p.preco|brl }}{% endif %}</td>
+        <td>
+          <form method="post" action="{% url 'painel:produto_alternar' p.pk 'disponivel' %}">{% csrf_token %}
+            <button type="submit" class="p-chave{% if p.disponivel %} on{% endif %}" aria-pressed="{{ p.disponivel|yesno:'true,false' }}">{% if p.disponivel %}Disponível{% else %}Esgotado{% endif %}</button>
+          </form>
+        </td>
+        <td>
+          <form method="post" action="{% url 'painel:produto_alternar' p.pk 'destaque' %}">{% csrf_token %}
+            <button type="submit" class="p-chave{% if p.destaque %} on{% endif %}" aria-pressed="{{ p.destaque|yesno:'true,false' }}">{% if p.destaque %}Em alta{% else %}Normal{% endif %}</button>
+          </form>
+        </td>
+        <td>
+          <form method="post" action="{% url 'painel:produto_promocao' p.pk %}" class="p-promo">{% csrf_token %}
+            <input type="text" name="percentual" inputmode="decimal" placeholder="% off" aria-label="Percentual de desconto de {{ p.nome }}" size="4">
+            <button type="submit" class="p-chave">Aplicar</button>
+            {% if p.em_promocao %}<button type="submit" name="remover" value="1" class="p-chave" formnovalidate>Remover</button>{% endif %}
+          </form>
+        </td>
+        <td class="p-acoes">
+          <a href="{% url 'painel:produto_fotos' p.pk %}">Fotos ({{ p.fotos.all|length }})</a>
+          <a href="{% url 'painel:produtos_editar' p.pk %}">Editar</a>
+          <a class="perigo" href="{% url 'painel:produtos_excluir' p.pk %}">Excluir</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="p-vazio">Nenhum produto cadastrado ainda.</p>
+{% endif %}
+{% endblock %}

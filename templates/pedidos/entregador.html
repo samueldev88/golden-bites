@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block titulo %}Entrega {{ pedido.codigo }} · {{ loja.nome }}{% endblock %}
+{% block cabecalho %}Entrega {{ pedido.codigo }}{% endblock %}
+{% block content %}
+<div class="container" style="max-width:34rem;padding-block:1.25rem 7rem">
+  <section class="bloco" aria-labelledby="ent-end">
+    <h2 id="ent-end" style="margin:0 0 .5rem">Entregar para {{ pedido.cliente.nome }}</h2>
+    <p style="font-size:1.6rem;line-height:1.25;margin:.25rem 0">
+      {{ pedido.rua }}, <strong>nº {{ pedido.numero }}</strong>
+    </p>
+    <p style="margin:.25rem 0">
+      {% if pedido.complemento %}{{ pedido.complemento }} · {% endif %}{{ pedido.bairro_nome }}{% if pedido.cep %} · CEP {{ pedido.cep }}{% endif %}
+    </p>
+    {% if pedido.referencia %}<p class="ajuda">Referência: {{ pedido.referencia }}</p>{% endif %}
+    {% if pedido.destino_precisao and pedido.destino_precisao != "endereco" %}
+    <p class="ajuda">O ponto no mapa é aproximado (só achamos a {{ pedido.destino_precisao }}). Confira o número na porta.</p>
+    {% endif %}
+  </section>
+
+  <div class="opcoes" style="margin-block:1rem">
+    <a class="btn btn-ouro btn-bloco" href="{{ url_google }}" target="_blank" rel="noopener">Abrir no Google Maps</a>
+    <a class="btn btn-ouro btn-bloco" href="{{ url_waze }}" target="_blank" rel="noopener">Abrir no Waze</a>
+    <a class="btn btn-ouro btn-bloco" href="{{ url_whatsapp }}" target="_blank" rel="noopener">Chamar no WhatsApp</a>
+  </div>
+
+  <section class="bloco" aria-labelledby="ent-loc">
+    <h2 id="ent-loc" style="margin:0 0 .5rem">Localização para o cliente</h2>
+    {% if em_entrega %}
+    <p class="ajuda" id="loc-msg" role="status" aria-live="polite">Toque em iniciar e mantenha esta tela aberta durante a entrega.</p>
+    <button type="button" class="btn btn-grande btn-bloco" id="loc-botao"
+            data-url="{% url 'pedidos:posicao_enviar' pedido.codigo %}">Iniciar compartilhamento</button>
+    {% else %}
+    <p class="ajuda">O compartilhamento só funciona quando o pedido está como “Saiu para entrega”. Mude o status no painel e volte aqui.</p>
+    {% endif %}
+  </section>
+</div>
+
+{% if em_entrega %}
+<script nonce="{{ request.csp_nonce }}">
+(() => {
+  const botao = document.getElementById("loc-botao");
+  const msg = document.getElementById("loc-msg");
+  const csrf = (document.querySelector('meta[name="csrf-token"]') || {}).content || "";
+  let id = null, trava = null, ultimo = 0;
+
+  const pedirTela = async () => {
+    try { trava = await navigator.wakeLock.request("screen"); } catch (e) { /* sem suporte: segue */ }
+  };
+  document.addEventListener("visibilitychange", () => {
+    if (id !== null && document.visibilityState === "visible") pedirTela();
+  });
+
+  const parar = (texto) => {
+    if (id !== null) navigator.geolocation.clearWatch(id);
+    id = null;
+    if (trava) { trava.release(); trava = null; }
+    botao.textContent = "Iniciar compartilhamento";
+    if (texto) msg.textContent = texto;
+  };
+
+  const enviar = async (pos) => {
+    const agora = Date.now();
+    if (agora - ultimo < 4000) return; // no máximo um envio a cada 4 s
+    ultimo = agora;
+    try {
+      const r = await fetch(botao.dataset.url, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": csrf },
+        body: JSON.stringify({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
+      });
+      if (r.status === 409) { parar("Pedido não está mais em entrega. Compartilhamento encerrado."); return; }
+      if (r.status === 403 || r.redirected) { parar("Sessão expirada. Entre no painel de novo."); return; }
+      msg.textContent = "Compartilhando sua localização. Última atualização às " +
+        new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) + ".";
+    } catch (e) {
+      msg.textContent = "Sem internet agora. Vamos tentar de novo.";
+    }
+  };
+
+  botao.addEventListener("click", () => {
+    if (id !== null) { parar("Compartilhamento pausado."); return; }
+    if (!navigator.geolocation) { msg.textContent = "Este aparelho não permite localização."; return; }
+    msg.textContent = "Procurando sinal de GPS…";
+    id = navigator.geolocation.watchPosition(enviar, (erro) => {
+      parar(erro.code === 1
+        ? "Permissão negada. Libere a localização para este site nas configurações do navegador."
+        : "Não foi possível obter a localização. Em celular, o site precisa abrir por https.");
+    }, { enableHighAccuracy: true, maximumAge: 2000, timeout: 20000 });
+    botao.textContent = "Parar compartilhamento";
+    pedirTela();
+  });
+})();
+</script>
+{% endif %}
+{% endblock %}

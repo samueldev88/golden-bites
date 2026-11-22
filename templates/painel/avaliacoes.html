@@ -1,0 +1,66 @@
+{% extends "painel/base.html" %}
+{% block titulo %}Avaliações{% endblock %}
+{% block conteudo %}
+<div class="p-barra">
+  <h1>Avaliações dos produtos</h1>
+</div>
+
+<div class="p-cartoes">
+  <div class="p-cartao">
+    <span>Avaliações de produtos</span>
+    <strong>{{ total }}</strong>
+  </div>
+  <div class="p-cartao">
+    <span>Média das notas</span>
+    <strong>{% if media %}{{ media|floatformat:1 }} / 5{% else %}—{% endif %}</strong>
+  </div>
+</div>
+
+<section class="p-caixa">
+  <h2>Opiniões dos clientes</h2>
+  {% for avaliacao in avaliacoes_produtos %}
+  <article class="p-avaliacao-item">
+    <div class="p-avaliacao-cabecalho">
+      <strong class="p-avaliacao-estrelas" aria-label="{{ avaliacao.nota }} de 5 estrelas">{{ avaliacao.estrelas }}</strong>
+      <span>Produto <strong>{{ avaliacao.produto.nome }}</strong></span>
+      <span>Pedido <a href="{% url 'painel:pedido_detalhe' avaliacao.pedido.codigo %}">{{ avaliacao.pedido.codigo }}</a></span>
+    </div>
+    <p class="p-nota">{{ avaliacao.pedido.cliente.nome }} · {{ avaliacao.criado_em|date:"d/m/Y H:i" }}</p>
+    <p class="p-avaliacao-comentario">{{ avaliacao.comentario }}</p>
+  </article>
+  {% empty %}
+  <p class="p-vazio">Ainda não há avaliações. Elas aparecerão aqui após a entrega dos pedidos avaliados.</p>
+  {% endfor %}
+</section>
+
+{% if pagina.has_other_pages %}
+<nav class="p-paginacao" aria-label="Paginação das avaliações">
+  {% if pagina.has_previous %}<a class="btn" href="?pagina={{ pagina.previous_page_number }}">Anterior</a>{% endif %}
+  <span>Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
+  {% if pagina.has_next %}<a class="btn" href="?pagina={{ pagina.next_page_number }}">Próxima</a>{% endif %}
+</nav>
+{% endif %}
+
+{% if avaliacoes_antigas or pagina_antigas.has_other_pages %}
+<section class="p-caixa">
+  <h2>Avaliações gerais anteriores</h2>
+  {% for avaliacao in avaliacoes_antigas %}
+  <article class="p-avaliacao-item">
+    <div class="p-avaliacao-cabecalho">
+      <strong class="p-avaliacao-estrelas" aria-label="{{ avaliacao.nota }} de 5 estrelas">{{ avaliacao.estrelas }}</strong>
+      <span>Pedido <a href="{% url 'painel:pedido_detalhe' avaliacao.pedido.codigo %}">{{ avaliacao.pedido.codigo }}</a></span>
+      <span>{{ avaliacao.pedido.cliente.nome }} · {{ avaliacao.criado_em|date:"d/m/Y H:i" }}</span>
+    </div>
+    <p class="p-avaliacao-comentario">{{ avaliacao.comentario }}</p>
+  </article>
+  {% endfor %}
+  {% if pagina_antigas.has_other_pages %}
+  <nav class="p-paginacao" aria-label="Paginação das avaliações gerais anteriores">
+    {% if pagina_antigas.has_previous %}<a class="btn" href="?antigas_pagina={{ pagina_antigas.previous_page_number }}">Anteriores</a>{% endif %}
+    <span>Página {{ pagina_antigas.number }} de {{ pagina_antigas.paginator.num_pages }}</span>
+    {% if pagina_antigas.has_next %}<a class="btn" href="?antigas_pagina={{ pagina_antigas.next_page_number }}">Próximas</a>{% endif %}
+  </nav>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}

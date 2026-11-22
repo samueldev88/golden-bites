@@ -1,0 +1,17 @@
+{% extends "painel/base.html" %}
+{% block titulo %}Entregas{% endblock %}
+{% block conteudo %}
+<div class="p-barra">
+  <h1>Entregas e agendamentos</h1>
+  <span class="p-atalhos">
+    <a href="{% url 'painel:faixas_lista' %}">Faixas de taxa</a>
+    <a href="{% url 'painel:bairros_lista' %}">Bairros e regiões</a>
+  </span>
+</div>
+
+<h2>Agendadas</h2>
+{% include "painel/_tabela_pedidos.html" with pedidos=agendadas %}
+
+<h2>Entrega rápida em andamento</h2>
+{% include "painel/_tabela_pedidos.html" with pedidos=rapidas %}
+{% endblock %}

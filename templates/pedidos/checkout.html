@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% load static loja_tags %}
+{% block titulo %}Finalizar pedido · {{ loja.nome }}{% endblock %}
+{% block cabecalho %}Finalizar pedido{% endblock %}
+{% block content %}
+<div class="container checkout">
+  <form id="form-checkout" method="post" novalidate
+        data-subtotal="{{ subtotal|stringformat:'.2f' }}"
+        data-url-cupom="{% url 'pedidos:cupom' %}" data-url-cep="{% url 'pedidos:cep' %}"
+        data-url-localizacao="{% url 'pedidos:localizacao' %}">
+    {% csrf_token %}
+
+    <div class="checkout-campos">
+      {% if form.non_field_errors %}<div class="aviso" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+
+      <fieldset class="bloco">
+        <legend>Seus dados</legend>
+        {% if trocas %}
+        <p class="aviso-cep info">Você está trocando <strong>{{ pontos_usados }} ponto{{ pontos_usados|pluralize }}</strong> nesta compra.
+          Use o mesmo WhatsApp confirmado na página de Fidelidade.</p>
+        {% endif %}
+        <div class="duas-colunas">
+          {% include "partials/_campo.html" with campo=form.nome %}
+          {% include "partials/_campo.html" with campo=form.sobrenome %}
+        </div>
+        {% include "partials/_campo.html" with campo=form.telefone %}
+        <p class="ajuda sem-cadastro">Sem login e sem cadastro. Seus dados ficam salvos só neste aparelho para o próximo pedido.</p>
+      </fieldset>
+
+      <fieldset class="bloco">
+        <legend>Endereço de entrega</legend>
+        <div class="local-gps">
+          <button type="button" class="btn btn-ouro" id="usar-localizacao">Usar minha localização</button>
+          <p class="ajuda" id="gps-status">Preenche rua, número e bairro pelo GPS do celular, para a entrega ir certinho.</p>
+        </div>
+        {{ form.pin_lat }}{{ form.pin_lon }}
+        <div class="duas-colunas linha-cep">
+          {% include "partials/_campo.html" with campo=form.cep %}
+          <div class="campo campo-acao">
+            <button type="button" class="btn btn-ouro btn-bloco" id="calcular-rota" disabled>Calcular entrega</button>
+          </div>
+        </div>
+        <div id="cep-aviso" class="aviso-cep" role="status" aria-live="polite" hidden></div>
+        <div id="rota-resumo" class="rota-resumo" hidden>
+          <dl>
+            <div id="rota-endereco-linha"><dt>Endereço</dt><dd id="rota-endereco"></dd></div>
+            <div><dt>Distância da rota</dt><dd id="rota-km"></dd></div>
+            <div id="rota-tempo-linha"><dt>Tempo de trajeto</dt><dd id="rota-tempo"></dd></div>
+            <div id="rota-previsao-linha" hidden><dt>Previsão de chegada</dt><dd id="rota-previsao"></dd></div>
+            <div><dt>Taxa de entrega</dt><dd id="rota-taxa"></dd></div>
+          </dl>
+          {% if loja.fidelidade_ativa %}<p class="nota" id="rota-atraso" hidden>Se a entrega passar da previsão, você ganha 1 ponto de fidelidade a cada 5 minutos de atraso.</p>{% endif %}
+        </div>
+        {% include "partials/_campo.html" with campo=form.rua %}
+        <div class="duas-colunas">
+          {% include "partials/_campo.html" with campo=form.numero %}
+          {% include "partials/_campo.html" with campo=form.complemento %}
+        </div>
+        <p class="aviso-cep info" id="aviso-numero" hidden>Não encontramos esse número no mapa. Confira o número digitado ou use “Usar minha localização”.</p>
+        {% include "partials/_campo.html" with campo=form.bairro %}
+        {% include "partials/_campo.html" with campo=form.referencia %}
+      </fieldset>
+
+      <fieldset class="bloco">
+        <legend>Como você quer receber?</legend>
+        <div class="opcoes">
+          <label class="opcao">
+            <input type="radio" name="modalidade" value="rapida" {% if form.modalidade.value|default:'rapida' == 'rapida' %}checked{% endif %}>
+            <span><strong>Entrega rápida</strong><small>De bicicleta, taxa pela distância</small></span>
+          </label>
+          <label class="opcao">
+            <input type="radio" name="modalidade" value="agendada" {% if form.modalidade.value == 'agendada' %}checked{% endif %}>
+            <span><strong>Entrega agendada</strong><small>Você escolhe o dia</small></span>
+          </label>
+        </div>
+        <div id="erro-modalidade">{% for e in form.modalidade.errors %}<p class="erro">{{ e }}</p>{% endfor %}</div>
+
+        <div data-modo="agendada" hidden>
+          <div class="duas-colunas">
+            {% include "partials/_campo.html" with campo=form.data_agendada %}
+            {% include "partials/_campo.html" with campo=form.horario_combinado %}
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="bloco">
+        <legend>Pagamento</legend>
+        <div class="opcoes">
+          <label class="opcao">
+            <input type="radio" name="forma_pagamento" value="pix" {% if form.forma_pagamento.value|default:'pix' == 'pix' %}checked{% endif %}>
+            <span><strong>Pix</strong><small>Confirmação na hora</small></span>
+          </label>
+          <label class="opcao">
+            <input type="radio" name="forma_pagamento" value="cartao" {% if form.forma_pagamento.value == 'cartao' %}checked{% endif %}>
+            <span><strong>Cartão</strong><small>Crédito ou débito</small></span>
+          </label>
+        </div>
+        <p class="ajuda">Você conclui o pagamento no ambiente seguro do Mercado Pago.</p>
+      </fieldset>
+
+
+      <fieldset class="bloco">
+        <legend>Cupom e observações</legend>
+        <div class="campo {% if form.cupom.errors %}tem-erro{% endif %}">
+          <label for="{{ form.cupom.id_for_label }}">{{ form.cupom.label }}</label>
+          <div class="cupom-linha">
+            {{ form.cupom }}
+            <button type="button" class="btn btn-ouro" id="aplicar-cupom">Aplicar</button>
+          </div>
+          <p class="ajuda" id="cupom-msg" role="status"></p>
+          {% for e in form.cupom.errors %}<p class="erro">{{ e }}</p>{% endfor %}
+        </div>
+        {% include "partials/_campo.html" with campo=form.observacoes %}
+      </fieldset>
+    </div>
+
+    <aside class="checkout-resumo resumo" aria-label="Resumo do pedido">
+      <h2>Resumo</h2>
+      <ul class="resumo-itens">
+        {% for i in itens %}
+        <li><span>{{ i.quantidade }}× {{ i.produto.nome }}</span><span>{{ i.subtotal|brl }}</span></li>
+        {% endfor %}
+        {% for t in trocas %}
+        <li class="troca-linha"><span>{{ t.quantidade }}× {{ t.produto.nome }} <em>troca de pontos</em></span><span>{{ t.pontos }} pts</span></li>
+        {% endfor %}
+      </ul>
+      <div class="linha"><span>Produtos</span><strong>{{ subtotal|brl }}</strong></div>
+      <div class="linha"><span>Entrega</span><strong id="res-taxa">Calcule a entrega</strong></div>
+      <div class="linha desconto" id="linha-desconto" hidden><span>Desconto</span><strong id="res-desconto"></strong></div>
+      <div class="linha total"><span>Total</span><strong id="res-total">{{ subtotal|brl }}</strong></div>
+      <p class="nota" id="res-nota" hidden>Vamos confirmar a taxa de entrega e liberar o pagamento nesta mesma página.</p>
+      <button type="submit" class="btn btn-grande btn-bloco" id="enviar">Ir para o pagamento</button>
+      <p class="centro"><a class="link-discreto" href="{% url 'carrinho:ver' %}">Voltar ao carrinho</a></p>
+    </aside>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block titulo %}Catálogo · {{ loja.nome }}{% endblock %}
+{% block cabecalho %}Catálogo{% endblock %}
+{% block content %}
+<div class="container">
+  <h2 class="secao-titulo">O que você quer pedir hoje?</h2>
+
+  <label class="busca">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.500"/><path d="m16 16 4 4"/></svg>
+    <span class="so-leitor">Buscar produto</span>
+    <input type="search" id="busca" placeholder="Qual produto procura?" autocomplete="off">
+  </label>
+
+  {% if categorias %}
+  <div class="chips" role="group" aria-label="Filtrar por categoria">
+    <button type="button" class="chip ativo" data-filtro="">Todos</button>
+    {% for c in categorias %}<button type="button" class="chip" data-filtro="{{ c.id }}">{{ c.nome }}</button>{% endfor %}
+  </div>
+  {% endif %}
+
+  {% if produtos %}
+    <div class="grade" id="grade">
+      {% for p in produtos %}{% include "partials/_card.html" %}{% endfor %}
+    </div>
+    <p class="vazio" id="sem-resultado" hidden>Nenhum produto encontrado. Tente outro nome ou categoria.</p>
+  {% else %}
+    <p class="vazio">O catálogo está sendo preparado. Volte em breve.</p>
+  {% endif %}
+</div>
+{% endblock %}

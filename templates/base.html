@@ -1,0 +1,86 @@
+{% load static loja_tags %}<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#4B1E0E">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <meta name="description" content="{{ loja.nome }}: {{ loja.slogan }}">
+  <title>{% block titulo %}{{ loja.nome }} · {{ loja.slogan }}{% endblock %}</title>
+  <link rel="icon" href="{% static 'img/favicon.png' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/site.css' %}?v=20261122-7">
+</head>
+<body class="{% block classe_body %}{% endblock %}">
+  <a class="pular" href="#conteudo">Ir para o conteúdo</a>
+
+  {% block topo %}
+  <header class="topo">
+    <a class="topo-logo" href="{% url 'catalogo:home' %}" aria-label="{{ loja.nome }}: início">
+      <img src="{% static 'img/logo-golden-bites.png' %}?v=20261120-2" alt="" width="44" height="44">
+    </a>
+    <h1 class="topo-titulo">{% block cabecalho %}{{ loja.nome }}{% endblock %}</h1>
+    <span class="topo-espaco"></span>
+  </header>
+  {% endblock %}
+
+  <main id="conteudo">{% block content %}{% endblock %}</main>
+
+  <footer class="rodape-legal">
+    <div class="container">
+      {% block agradecimento_rodape %}{% endblock %}
+      <strong>{{ loja.nome }}</strong>
+      <p>Usamos armazenamento essencial para o funcionamento da loja. Consulte os detalhes nos avisos abaixo.</p>
+      <nav aria-label="Políticas e privacidade">
+        <a href="{% url 'catalogo:politicas' %}#privacidade">Política de Privacidade</a>
+        <a href="{% url 'catalogo:politicas' %}#termos">Termos de Serviço</a>
+        <a href="{% url 'catalogo:politicas' %}#cookies">Aviso de Cookies</a>
+        <a href="{% url 'catalogo:politicas' %}#reembolso">Política de Reembolso</a>
+        <a href="{% url 'catalogo:politicas' %}#solicitacao-lgpd">Formulário LGPD</a>
+        <a href="{% url 'catalogo:politicas' %}#conformidade-lgpd">Conformidade LGPD</a>
+      </nav>
+    </div>
+  </footer>
+
+  <div class="toasts" id="toasts" role="status" aria-live="polite">
+    {% for m in messages %}<p class="toast {{ m.tags }}">{{ m.message }}</p>{% endfor %}
+  </div>
+
+  {% with rota=request.resolver_match.url_name ns=request.resolver_match.app_name %}
+  <nav class="nav-inferior" aria-label="Navegação principal">
+    <span class="nav-indicador" aria-hidden="true"></span>
+    <a href="{% url 'catalogo:home' %}"{% if rota == 'home' %} class="ativo" aria-current="page"{% endif %}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/></svg>
+      <span>Início</span>
+    </a>
+    <a href="{% url 'catalogo:catalogo' %}"{% if rota == 'catalogo' %} class="ativo" aria-current="page"{% endif %}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg>
+      <span>Catálogo</span>
+    </a>
+    <a href="{% url 'fidelidade:pagina' %}"{% if ns == 'fidelidade' %} class="ativo" aria-current="page"{% endif %}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3.500 2.600 5.300 5.900.8-4.300 4.100 1 5.800L12 16.800l-5.200 2.700 1-5.800-4.300-4.100 5.900-.8z"/></svg>
+      <span>Fidelidade</span>
+    </a>
+    <a href="{% url 'pedidos:meus' %}"{% if ns == 'pedidos' and rota != 'checkout' %} class="ativo" aria-current="page"{% endif %}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h12v17l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>
+      <span>Pedidos</span>
+    </a>
+  </nav>
+  <div class="acoes-flutuantes" aria-label="Atalhos rápidos">
+    {% if ns != 'carrinho' and rota != 'checkout' %}
+    <a class="fab-carrinho" href="{% url 'carrinho:ver' %}" aria-label="Abrir carrinho, {{ carrinho_qtd }} item(ns)"{% if not carrinho_qtd %} hidden{% endif %}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6.500a3 3 0 0 1 6 0V8"/></svg>
+      <b class="fab-qtd">{{ carrinho_qtd }}</b>
+    </a>
+    {% endif %}
+    {% include "partials/_whatsapp.html" with posicao="whatsapp-flutuante" %}
+  </div>
+  {% endwith %}
+
+  <script src="{% static 'js/site.js' %}?v=20261120-13" defer></script>
+  <script src="{% static 'js/galeria.js' %}" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load loja_tags %}
+{% block titulo %}Políticas e privacidade · {{ loja.nome }}{% endblock %}
+{% block cabecalho %}Políticas{% endblock %}
+{% block content %}
+<div class="container estreito politicas">
+  <header class="politicas-intro">
+    <p class="fid-eyebrow">Golden Bites</p>
+    <h2>Políticas, privacidade e LGPD</h2>
+    <p>Estas informações explicam como a loja atende pedidos, utiliza dados e recebe solicitações dos clientes.</p>
+  </header>
+
+  <nav class="politicas-indice" aria-label="Nesta página">
+    <a href="#privacidade">Privacidade</a>
+    <a href="#termos">Termos de serviço</a>
+    <a href="#cookies">Cookies</a>
+    <a href="#reembolso">Reembolso</a>
+    <a href="#solicitacao-lgpd">Formulário LGPD</a>
+    <a href="#conformidade-lgpd">Conformidade LGPD</a>
+  </nav>
+
+  <section class="politicas-bloco" id="privacidade">
+    <h2>Política de Privacidade</h2>
+    <p><strong>Responsável pelo tratamento:</strong> Samuel Cordeiro De Araujo, responsável pela Golden Bites.
+      Para assuntos de privacidade, use o formulário LGPD desta página ou
+      {% if loja.whatsapp %}<a href="https://wa.me/{{ loja.whatsapp }}">fale com a loja pelo WhatsApp</a>.{% else %}entre em contato pelos canais oficiais da loja.{% endif %}</p>
+
+    <h3>Quais dados podem ser tratados</h3>
+    <ul>
+      <li>Nome, WhatsApp e, quando informado, e-mail para identificar e atender o cliente.</li>
+      <li>CEP, endereço, complemento, referência e modalidade/data de entrega para processar e entregar pedidos.</li>
+      <li>Produtos, valores, cupons, status e histórico de pedidos, além de mensagens relacionadas à entrega.</li>
+      <li>Dados de fidelidade, como pontos e identificador do aparelho confiável, quando o cliente utiliza o programa.</li>
+      <li>Localização aproximada, somente quando o cliente escolhe usar a localização do aparelho ou confirma um ponto no mapa.</li>
+      <li>Dados técnicos básicos necessários para segurança, funcionamento e prevenção de abuso do site.</li>
+    </ul>
+
+    <h3>Finalidades e compartilhamento</h3>
+    <p>Os dados são usados para receber e acompanhar pedidos, calcular entrega, confirmar pagamentos, atender o cliente,
+      manter o programa de fidelidade e cumprir obrigações legais. O pagamento é concluído no ambiente do Mercado Pago;
+      o site não recebe nem armazena o número completo do cartão.</p>
+    <p>Para prestar essas funções, o site consulta serviços de CEP (BrasilAPI, AwesomeAPI e ViaCEP), geocodificação,
+      rotas e mapas do OpenStreetMap, além de carregar fontes do Google. O Mercado Pago processa pagamentos.
+      Esses fornecedores podem receber dados de conexão e as informações necessárias à função solicitada, conforme
+      seus próprios termos e avisos de privacidade. Links para WhatsApp e Instagram só são abertos quando o cliente
+      escolhe acessá-los.</p>
+
+    <h3>Armazenamento e retenção</h3>
+    <p>Os dados de pedidos e atendimento são mantidos pelo tempo necessário para cumprir as finalidades descritas,
+      obrigações legais e exercício de direitos. Dados de fidelidade permanecem enquanto o programa e a relação com
+      o cliente exigirem. O formulário LGPD é acessível somente a pessoas autorizadas e seus registros são mantidos
+      pelo período necessário para responder e documentar o atendimento.</p>
+
+    <h3>Seus direitos</h3>
+    <p>Nos termos da LGPD, o titular pode solicitar confirmação e acesso, correção, informação sobre uso e
+      compartilhamento, portabilidade, anonimização, bloqueio ou eliminação quando cabível, e revogação de
+      consentimento ou oposição. A eliminação pode ser limitada quando a manutenção for exigida por lei ou necessária
+      ao exercício regular de direitos. Use o formulário abaixo; podemos pedir informações proporcionais para
+      confirmar sua identidade antes de alterar ou revelar dados.</p>
+  </section>
+
+  <section class="politicas-bloco" id="termos">
+    <h2>Termos de Serviço</h2>
+    <ul>
+      <li>O cliente deve informar dados de contato e entrega corretos. A loja usa essas informações para confirmar e entregar o pedido.</li>
+      <li>Disponibilidade, descrição, preço e taxas são apresentados no site e no checkout; o pedido depende da confirmação da loja e, quando aplicável, do pagamento.</li>
+      <li>A entrega rápida está sujeita à área e taxa exibidas no site. A entrega agendada depende de disponibilidade; data e horário são confirmados com o cliente pelo WhatsApp.</li>
+      <li>O acompanhamento por mapa e o chat, quando disponíveis, são recursos ligados ao pedido e usados para organizar a entrega.</li>
+      <li>O pagamento é processado pelo Mercado Pago, de acordo com as condições apresentadas pelo provedor.</li>
+    </ul>
+    <p>Estes termos não afastam os direitos garantidos pela legislação de defesa do consumidor.</p>
+  </section>
+
+  <section class="politicas-bloco" id="cookies">
+    <h2>Aviso de Cookies e armazenamento local</h2>
+    <p>O site usa armazenamento essencial para manter o carrinho e a sessão, proteger formulários contra envio indevido
+      e reconhecer o aparelho confiável no programa de fidelidade. O navegador também pode guardar neste aparelho,
+      em armazenamento local, dados de contato e endereço para preencher pedidos futuros. Esses dados locais podem
+      ser apagados nas configurações do navegador.</p>
+    <p>Mapas, fontes e serviços de CEP podem ser carregados de fornecedores externos, que recebem dados técnicos de
+      conexão quando usados. Atualmente, o site não instala ferramentas próprias de publicidade ou análise de tráfego.
+      Se o armazenamento essencial for bloqueado, partes do carrinho, checkout ou fidelidade podem não funcionar.</p>
+  </section>
+
+  <section class="politicas-bloco" id="reembolso">
+    <h2>Política de Cancelamento e Reembolso</h2>
+    <p>Para solicitar cancelamento, relatar um pedido não recebido ou informar produto incorreto ou avariado, entre em
+      contato com a Golden Bites pelo WhatsApp e informe o código do pedido. A loja verificará o ocorrido e orientará
+      a solução adequada.</p>
+    <p>Cancelamentos, devoluções e reembolsos serão tratados conforme os direitos previstos na legislação aplicável,
+      inclusive as regras do Código de Defesa do Consumidor para compras realizadas à distância, quando cabíveis.
+      Esta política não cria restrições aos direitos legais do cliente.</p>
+    <p>Quando houver reembolso de um pagamento feito pelo Mercado Pago, o estorno será solicitado pelo meio de
+      pagamento utilizado. O prazo para aparecer no saldo ou na fatura depende do Mercado Pago e da instituição
+      financeira.</p>
+    {% if loja.whatsapp %}<p><a class="btn btn-ouro" href="https://wa.me/{{ loja.whatsapp }}">Falar sobre um pedido</a></p>{% endif %}
+  </section>
+
+  <section class="politicas-bloco" id="solicitacao-lgpd">
+    <h2>Formulário de Solicitações LGPD</h2>
+    <p>Use este formulário para exercer seus direitos de privacidade. Informe um e-mail ou WhatsApp para recebermos
+      e respondermos à solicitação. Não envie senhas, dados completos de cartão ou documentos desnecessários.</p>
+    <p>As solicitações ficam registradas no painel administrativo da loja para análise manual; o envio do formulário
+      confirma o recebimento, mas não significa que a solicitação já foi concluída.</p>
+    <form class="form-lgpd" method="post" action="{% url 'catalogo:politicas' %}#solicitacao-lgpd">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="aviso" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+      {% for field in form %}
+      <div class="campo {% if field.errors %}tem-erro{% endif %}">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<p class="ajuda">{{ field.help_text }}</p>{% endif %}
+        {% for erro in field.errors %}<p class="erro">{{ erro }}</p>{% endfor %}
+      </div>
+      {% endfor %}
+      <button class="btn btn-bloco" type="submit">Enviar solicitação</button>
+    </form>
+  </section>
+
+  <section class="politicas-bloco" id="conformidade-lgpd">
+    <h2>Privacidade e conformidade LGPD</h2>
+    <p>A Golden Bites busca limitar o uso de dados às funções da loja, controlar o acesso administrativo e utilizar
+      provedores de pagamento e mapas para as finalidades descritas. O cliente escolhe se deseja compartilhar a
+      localização do aparelho; dados completos de cartão são tratados pelo Mercado Pago, não pelo site.</p>
+    <p>Pedidos de titulares são recebidos pelo formulário acima e precisam ser analisados e respondidos pelo
+      responsável. A publicação desta página e a existência do formulário não constituem certificação de conformidade
+      nem substituem a revisão jurídica e os procedimentos internos de segurança, retenção e gestão de fornecedores.</p>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "painel/base.html" %}
+{% block titulo %}{{ titulo }}{% endblock %}
+{% block conteudo %}
+<div class="p-barra"><h1>{{ titulo }}</h1><a href="{{ url_voltar }}">Voltar</a></div>
+<form method="post" enctype="multipart/form-data" class="p-form" novalidate>
+  {% csrf_token %}
+  {% if form.non_field_errors %}<p class="p-msg error">{{ form.non_field_errors }}</p>{% endif %}
+  {% for campo in form %}{% include "partials/_campo.html" %}{% endfor %}
+  {% if form.instance.foto %}<p class="p-nota">Foto atual: <a href="{{ form.instance.foto.url }}" target="_blank" rel="noopener">abrir</a></p>{% endif %}
+  <div class="p-form-acoes">
+    <button type="submit" class="btn">Salvar</button>
+    <a href="{{ url_voltar }}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}
