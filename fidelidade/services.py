@@ -11,7 +11,7 @@ from django.db import transaction
 from django.db.models import F, Sum
 from django.utils import timezone
 
-from maison.security import ip_do_cliente
+from golden.security import ip_do_cliente
 
 from .models import CodigoVinculo, Dispositivo, LimiteTentativas
 from .models import MovimentoPontos as M

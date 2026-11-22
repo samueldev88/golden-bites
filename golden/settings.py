@@ -63,7 +63,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "maison.middleware.TrustedProxyHeadersMiddleware",
+    "golden.middleware.TrustedProxyHeadersMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -72,10 +72,10 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "maison.middleware.ContentSecurityPolicyMiddleware",
+    "golden.middleware.ContentSecurityPolicyMiddleware",
 ]
 
-ROOT_URLCONF = "maison.urls"
+ROOT_URLCONF = "golden.urls"
 
 TEMPLATES = [
     {
@@ -93,7 +93,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "maison.wsgi.application"
+WSGI_APPLICATION = "golden.wsgi.application"
 
 # SQLite em produção só com opt-in explícito (ex.: PythonAnywhere com pouco tráfego).
 # Com várias instâncias ou muita concorrência, prefira PostgreSQL via DATABASE_URL.
