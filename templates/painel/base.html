@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/painel.css' %}?v=20261123-2">
+  <link rel="stylesheet" href="{% static 'css/painel.css' %}?v=20261123-3">
 </head>
 <body>
   {% with rota=request.resolver_match.url_name %}
@@ -19,7 +19,7 @@
       <span>Painel</span>
     </a>
     <button class="p-menu-toggle" type="button" aria-label="Abrir menu do painel" aria-controls="p-nav" aria-expanded="false">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      <span class="p-menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
     </button>
     <nav class="p-nav" id="p-nav" aria-label="Navegação do painel">
       <a href="{% url 'painel:dashboard' %}"{% if rota == 'dashboard' %} class="ativo" aria-current="page"{% endif %} aria-label="Início" title="Início">

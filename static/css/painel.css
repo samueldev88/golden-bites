@@ -1,6 +1,6 @@
 :root {
   --creme: #FCEDD9; --papel: #FFF9F1; --bege: #EBD8BE; --bege-2: #D9BF98;
-  --cacau: #4B1E0E; --cacau-2: #7A4A32; --dourado: #B8863F; --dourado-2: #8A5F22;
+  --cacau: #4B1E0E; --cacau-2: #7A4A32; --dourado: #B8863F; --dourado-2: #8A5F22; --dourado-claro: #E8C783;
   --ok: #2F6B45; --erro: #A02D22;
   --titulo: "Cormorant Garamond", Georgia, serif; --texto: "Jost", system-ui, sans-serif;
 }
@@ -209,10 +209,15 @@ small { color: #D8C3A8; }
   color: rgba(255, 249, 241, .68); background: transparent;
   transition: color .2s, background .2s, border-color .2s, transform .2s, box-shadow .2s;
 }
-.p-nav a svg, .p-conta svg, .p-menu-toggle svg {
+.p-nav a svg, .p-conta svg {
   width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.7;
   stroke-linecap: round; stroke-linejoin: round;
 }
+.p-menu-icon { display: flex; flex-direction: column; gap: 5px; width: 20px; }
+.p-menu-icon span { display: block; width: 100%; height: 2px; border-radius: 2px; background: currentColor; transition: transform .2s, opacity .2s; }
+.p-menu-toggle[aria-expanded="true"] .p-menu-icon span:first-child { transform: translateY(7px) rotate(45deg); }
+.p-menu-toggle[aria-expanded="true"] .p-menu-icon span:nth-child(2) { opacity: 0; }
+.p-menu-toggle[aria-expanded="true"] .p-menu-icon span:last-child { transform: translateY(-7px) rotate(-45deg); }
 .p-nav a:hover { color: #FFF9F1; background: rgba(255, 249, 241, .08); transform: translateY(-1px); }
 .p-nav a.ativo {
   color: #23170f; border-color: rgba(255, 242, 213, .6);
@@ -281,7 +286,7 @@ small { color: #D8C3A8; }
   .p-marca img { width: 40px; height: 40px; }
   .p-marca span { position: static; width: auto; height: auto; overflow: visible; clip: auto; font-size: 1.3rem; }
   .p-menu-toggle {
-    display: grid; place-items: center; order: 3; width: 42px; height: 42px; padding: 0;
+    display: grid; flex: 0 0 42px; place-items: center; order: 3; width: 42px; min-width: 42px; height: 42px; padding: 0;
     border: 1px solid rgba(224, 188, 116, .3); border-radius: 14px; color: var(--dourado-claro);
     background: rgba(255, 249, 241, .06); cursor: pointer;
   }
@@ -325,7 +330,7 @@ small { color: #D8C3A8; }
   .p-marca { gap: 6px; font-size: 1.15rem; }
   .p-marca span { font-size: 1.15rem; }
   .p-marca img { width: 36px; height: 36px; }
-  .p-menu-toggle { width: 38px; height: 38px; }
+  .p-menu-toggle { flex-basis: 38px; width: 38px; min-width: 38px; height: 38px; }
   .p-conta a, .p-conta button { width: 34px; }
   .p-cartoes { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .p-cartao { padding: 14px; }
