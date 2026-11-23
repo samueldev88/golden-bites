@@ -280,7 +280,7 @@ small { color: #D8C3A8; }
   .p-topo {
     inset: 0 0 auto; width: auto; height: 64px; flex-direction: row; justify-content: space-between;
     gap: 10px; padding: 8px 12px; overflow: visible; border-right: 0; border-bottom: 1px solid rgba(224, 188, 116, .22);
-    box-shadow: 0 10px 24px rgba(0, 0, 0, .24);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, .24); backdrop-filter: none; -webkit-backdrop-filter: none;
   }
   .p-marca { width: auto; flex-direction: row; justify-content: flex-start; gap: 9px; font-size: 1.3rem; }
   .p-marca img { width: 40px; height: 40px; }
@@ -295,9 +295,9 @@ small { color: #D8C3A8; }
   .p-conta form { width: auto; }
   .p-conta a, .p-conta button { width: 38px; height: 38px; }
   .p-nav {
-    position: absolute; z-index: 51; top: 64px; right: auto; bottom: auto; left: 0;
+    position: fixed; z-index: 51; inset: 64px auto 0 0;
     width: min(300px, 86vw);
-    height: calc(100vh - 64px); max-height: calc(100vh - 64px);
+    height: auto; max-height: none;
     align-items: stretch; gap: 7px; margin: 0; padding: 16px 12px calc(24px + env(safe-area-inset-bottom));
     overflow-y: auto; border-right: 1px solid rgba(224, 188, 116, .24);
     background: rgba(28, 19, 14, .98); box-shadow: 18px 0 45px rgba(0, 0, 0, .35);
@@ -319,11 +319,6 @@ small { color: #D8C3A8; }
   .p-confirma form { align-items: stretch; flex-direction: column; }
   .p-form-acoes { flex-wrap: wrap; }
   .p-periodo { margin-left: 0; }
-}
-@supports (height: 100dvh) {
-  @media (max-width: 760px) {
-    .p-nav { height: calc(100dvh - 64px); max-height: calc(100dvh - 64px); }
-  }
 }
 @media (max-width: 420px) {
   .p-topo { padding-inline: 9px; }
