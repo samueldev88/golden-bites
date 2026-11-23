@@ -35,6 +35,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 body.pagina-inicial { padding-bottom: 0; }
+body.pagina-catalogo { padding-bottom: 0; }
 body.nav-em-escuro::after {
   content: ""; position: fixed; z-index: 49; inset: auto 0 0;
   height: calc(var(--nav-escuro-altura, 112px) + env(safe-area-inset-bottom)); background: #1c100c; pointer-events: none;
@@ -266,6 +267,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round
 .texto-sobre { text-align: center; color: var(--cacau-2); font-size: 1.05rem; }
 .rodape-legal { margin-top: 0; padding: 24px 0 30px; background: #1c100c; color: var(--creme); }
 .pagina-inicial .rodape-legal { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+.pagina-catalogo .rodape-legal { padding-bottom: calc(88px + env(safe-area-inset-bottom)); }
 .rodape-legal > .container > strong { display: block; margin-bottom: 4px; font-family: var(--titulo); font-size: clamp(1.2rem, 4vw, 1.35rem); text-align: center; }
 .rodape-legal > .container > p { max-width: 46ch; margin: 0 auto 10px; padding-inline: 8px; color: #EBD8BE; font-size: clamp(.82rem, 2.8vw, .88rem); text-align: center; text-wrap: balance; }
 .rodape-legal nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 10px; max-width: 760px; margin-inline: auto; }
