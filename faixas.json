@@ -1,0 +1,112 @@
+[
+{
+  "model": "entregas.faixataxa",
+  "pk": 1,
+  "fields": {
+    "km_min": "0.0",
+    "km_max": "2.0",
+    "taxa": "2.00",
+    "ativa": true
+  }
+},
+{
+  "model": "entregas.faixataxa",
+  "pk": 2,
+  "fields": {
+    "km_min": "2.0",
+    "km_max": "4.0",
+    "taxa": "3.00",
+    "ativa": true
+  }
+},
+{
+  "model": "entregas.faixataxa",
+  "pk": 3,
+  "fields": {
+    "km_min": "4.0",
+    "km_max": "6.0",
+    "taxa": "5.00",
+    "ativa": true
+  }
+},
+{
+  "model": "entregas.faixataxa",
+  "pk": 4,
+  "fields": {
+    "km_min": "6.0",
+    "km_max": "9.0",
+    "taxa": "8.00",
+    "ativa": true
+  }
+},
+{
+  "model": "entregas.faixataxa",
+  "pk": 5,
+  "fields": {
+    "km_min": "9.0",
+    "km_max": "12.0",
+    "taxa": "11.00",
+    "ativa": true
+  }
+},
+{
+  "model": "entregas.bairro",
+  "pk": 1,
+  "fields": {
+    "nome": "Recreio - Região 1 (até 2 km)",
+    "modalidade": "rapida",
+    "distancia_km": "1.5",
+    "ativo": true
+  }
+},
+{
+  "model": "entregas.bairro",
+  "pk": 2,
+  "fields": {
+    "nome": "Recreio - Região 2 (2 a 4 km)",
+    "modalidade": "rapida",
+    "distancia_km": "3.0",
+    "ativo": true
+  }
+},
+{
+  "model": "entregas.bairro",
+  "pk": 3,
+  "fields": {
+    "nome": "Recreio - Região 3 (4 a 6 km)",
+    "modalidade": "rapida",
+    "distancia_km": "5.0",
+    "ativo": true
+  }
+},
+{
+  "model": "entregas.bairro",
+  "pk": 4,
+  "fields": {
+    "nome": "Barra da Tijuca",
+    "modalidade": "agendada",
+    "distancia_km": null,
+    "ativo": true
+  }
+},
+{
+  "model": "entregas.bairro",
+  "pk": 5,
+  "fields": {
+    "nome": "Jacarepaguá",
+    "modalidade": "agendada",
+    "distancia_km": null,
+    "ativo": true
+  }
+},
+{
+  "model": "entregas.bairro",
+  "pk": 6,
+  "fields": {
+    "nome": "Vargem Grande",
+    "modalidade": "agendada",
+    "distancia_km": null,
+    "ativo": true
+  }
+}
+]

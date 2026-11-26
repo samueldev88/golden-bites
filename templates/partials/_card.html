@@ -1,11 +1,15 @@
 {% load static loja_tags %}
 {% with qtd=carrinho_mapa|no_carrinho:p.id %}
-<article class="produto{% if not p.disponivel %} esgotado{% endif %}" data-nome="{{ p.nome|lower }}" data-categoria="{{ p.categoria_id|default:'' }}">
+<article class="produto{% if not p.disponivel or p.esgotado %} esgotado{% endif %}" data-nome="{{ p.nome|lower }}" data-categoria="{{ p.categoria_id|default:'' }}">
   <a class="produto-foto" href="{% url 'catalogo:produto' p.slug %}" aria-label="Ver detalhes de {{ p.nome }}">
     {% include "partials/_galeria.html" with p=p modo="card" %}
     {% if not p.disponivel %}<span class="selo selo-off">Indisponível</span>
+    {% elif p.esgotado %}<span class="selo selo-off">Esgotado</span>
     {% elif p.em_promocao %}<span class="selo selo-promo">-{{ p.desconto_percentual }}%</span>
     {% elif p.destaque %}<span class="selo">Em alta</span>{% endif %}
+    {% if p.disponivel and p.estoque_baixo %}
+    <span class="selo-estoque">{% if p.estoque == 1 %}Última unidade{% else %}{{ p.estoque }}un restantes{% endif %}</span>
+    {% endif %}
   </a>
   <div class="produto-corpo">
     <h3><a href="{% url 'catalogo:produto' p.slug %}">{{ p.nome }}</a></h3>
@@ -13,7 +17,7 @@
     <p class="produto-desc">{{ p.descricao|truncatechars:72 }}{% if p.descricao|length > 72 %} <a class="ver-mais" href="{% url 'catalogo:produto' p.slug %}">ver detalhes</a>{% endif %}</p>
     {% endif %}
     <p class="preco">{% if p.em_promocao %}<s>{{ p.preco|brl }}</s>{% endif %}<strong>{{ p.preco_final|brl }}</strong></p>
-    {% if p.disponivel %}{% include "partials/_comprar.html" with p=p qtd=qtd %}{% endif %}
+    {% if p.disponivel and not p.esgotado %}{% include "partials/_comprar.html" with p=p qtd=qtd %}{% endif %}
   </div>
 </article>
 {% endwith %}

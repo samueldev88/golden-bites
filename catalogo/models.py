@@ -5,6 +5,9 @@ from django.utils.text import slugify
 
 from .validators import validar_extensao_imagem, validar_imagem_produto
 
+# Quando o estoque chega a esse número (ou menos), o cliente vê "Nun restantes".
+LIMITE_ESTOQUE_BAIXO = 5
+
 
 def slug_unico(modelo, texto, pk=None):
     base = slugify(texto) or "item"
@@ -168,6 +171,14 @@ class Produto(models.Model):
         validators=[validar_extensao_imagem, validar_imagem_produto],
     )
     disponivel = models.BooleanField("Disponível", default=True)
+    controla_estoque = models.BooleanField(
+        "Controlar estoque", default=False,
+        help_text="Ligado: o estoque diminui a cada pedido, o cliente vê o aviso quando restam poucas unidades e o item esgota ao zerar.",
+    )
+    estoque = models.PositiveIntegerField(
+        "Quantidade em estoque", default=0,
+        help_text=f"Só vale se 'Controlar estoque' estiver ligado. O aviso aparece com {LIMITE_ESTOQUE_BAIXO} ou menos.",
+    )
     destaque = models.BooleanField("Em alta (aparece na página inicial)", default=False)
     pontos = models.PositiveSmallIntegerField(
         "Pontos de fidelidade por unidade", default=1,
@@ -217,6 +228,16 @@ class Produto(models.Model):
             return 0
         return int(round((1 - self.preco_promocional / self.preco) * 100))
 
+    @property
+    def esgotado(self):
+        """True quando o controle de estoque está ligado e acabou."""
+        return self.controla_estoque and self.estoque <= 0
+
+    @property
+    def estoque_baixo(self):
+        """True quando restam poucas unidades (1 até LIMITE_ESTOQUE_BAIXO)."""
+        return self.controla_estoque and 0 < self.estoque <= LIMITE_ESTOQUE_BAIXO
+
 
 class FotoProduto(models.Model):
     """Fotos extras do produto (a capa é o campo 'foto' do produto). Passam sozinhas na loja."""
@@ -235,4 +256,4 @@ class FotoProduto(models.Model):
         verbose_name_plural = "fotos do produto"
 
     def __str__(self):
-        return f"Foto {self.pk} de {self.produto_id}"
+        return f"Foto {self.pk} de {self.produto_id}" 

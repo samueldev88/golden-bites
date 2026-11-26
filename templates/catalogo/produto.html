@@ -10,8 +10,12 @@
     <div class="detalhe-fotos">
       {% include "partials/_galeria.html" with p=p modo="detalhe" %}
       {% if not p.disponivel %}<span class="selo selo-off">Indisponível</span>
+      {% elif p.esgotado %}<span class="selo selo-off">Esgotado</span>
       {% elif p.em_promocao %}<span class="selo selo-promo">-{{ p.desconto_percentual }}%</span>
       {% elif p.destaque %}<span class="selo">Em alta</span>{% endif %}
+      {% if p.disponivel and p.estoque_baixo %}
+      <span class="selo-estoque">{% if p.estoque == 1 %}Última unidade{% else %}{{ p.estoque }}un restantes{% endif %}</span>
+      {% endif %}
     </div>
     <div class="detalhe-info">
       {% if p.categoria %}<p class="detalhe-cat">{{ p.categoria }}</p>{% endif %}
@@ -20,8 +24,9 @@
       {% if loja.fidelidade_ativa and p.pontos %}<p class="detalhe-pontos">Vale {{ p.pontos }} ponto{{ p.pontos|pluralize }} de fidelidade</p>{% endif %}
       {% if p.descricao %}<div class="detalhe-desc">{{ p.descricao|linebreaks }}</div>{% endif %}
       <div class="detalhe-compra">
-        {% if p.disponivel %}{% include "partials/_comprar.html" with p=p qtd=qtd %}
-        {% else %}<p class="aviso">Este item está indisponível no momento.</p>{% endif %}
+        {% if not p.disponivel %}<p class="aviso">Este item está indisponível no momento.</p>
+        {% elif p.esgotado %}<p class="aviso">Este item está esgotado no momento.</p>
+        {% else %}{% include "partials/_comprar.html" with p=p qtd=qtd %}{% endif %}
       </div>
     </div>
   </div>

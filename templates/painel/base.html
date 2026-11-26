@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/painel.css' %}?v=20261123-4">
+  <link rel="stylesheet" href="{% static 'css/painel.css' %}?v=20261125-2">
 </head>
 <body>
   {% with rota=request.resolver_match.url_name %}
@@ -78,19 +78,22 @@
       const nav = document.querySelector(".p-nav");
       const fundo = document.querySelector(".p-scrim");
       if (!botao || !nav || !fundo) return;
-      const definirAberto = (aberto, devolverFoco = false) => {
+      const definirAberto = (aberto, devolverFoco = false, focarPrimeiro = false) => {
         nav.classList.toggle("aberto", aberto);
         fundo.classList.toggle("aberto", aberto);
         botao.setAttribute("aria-expanded", String(aberto));
         botao.setAttribute("aria-label", aberto ? "Fechar menu do painel" : "Abrir menu do painel");
         document.body.classList.toggle("p-menu-aberto", aberto);
-        if (aberto) {
+        if (aberto && focarPrimeiro) {
           const primeiroLink = nav.querySelector("a");
-          if (primeiroLink) primeiroLink.focus();
+          if (primeiroLink) primeiroLink.focus({ preventScroll: true });
         }
-        if (devolverFoco) botao.focus();
+        if (devolverFoco) botao.focus({ preventScroll: true });
       };
-      botao.addEventListener("click", () => definirAberto(botao.getAttribute("aria-expanded") !== "true"));
+      botao.addEventListener("click", (evento) => {
+        const abrir = botao.getAttribute("aria-expanded") !== "true";
+        definirAberto(abrir, false, evento.detail === 0);
+      });
       fundo.addEventListener("click", () => definirAberto(false, true));
       nav.addEventListener("click", (evento) => {
         if (evento.target.closest("a")) definirAberto(false, true);

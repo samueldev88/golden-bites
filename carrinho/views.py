@@ -17,6 +17,15 @@ def _inteiro(valor, padrao=1):
         return padrao
 
 
+def _eh_ajax(request):
+    return request.headers.get("x-requested-with") == "XMLHttpRequest"
+
+
+def _texto_restantes(produto):
+    n = produto.estoque
+    return f"Só restam {n} unidade{'s' if n != 1 else ''} de {produto.nome}."
+
+
 def ver(request):
     carrinho = Carrinho(request)
     itens = carrinho.itens()
@@ -37,16 +46,42 @@ def adicionar(request, produto_id):
     produto = get_object_or_404(Produto, pk=produto_id, disponivel=True)
     quantidade = max(_inteiro(request.POST.get("quantidade"), 1), 1)
     carrinho = Carrinho(request)
+
+    aviso = None
+    bloqueado = False  # True = não adiciona nada
+    if produto.esgotado:
+        aviso, bloqueado = f"{produto.nome} está esgotado.", True
+    elif produto.controla_estoque:
+        cabe = produto.estoque - carrinho.dados.get(str(produto.id), 0)
+        if cabe <= 0:
+            aviso, bloqueado = _texto_restantes(produto), True
+        elif quantidade > cabe:
+            quantidade = cabe
+            aviso = _texto_restantes(produto)
+
+    if bloqueado:
+        if _eh_ajax(request):
+            return JsonResponse({
+                "ok": False,
+                "quantidade": carrinho.dados.get(str(produto.id), 0),
+                "quantidade_total": carrinho.quantidade_total,
+                "mensagem": aviso,
+            })
+        messages.error(request, aviso)
+        return redirect("carrinho:ver")
+
     carrinho.adicionar(produto.id, quantidade)
 
-    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+    if _eh_ajax(request):
         return JsonResponse({
             "ok": True,
             "quantidade": carrinho.dados.get(str(produto.id), 0),
             "quantidade_total": carrinho.quantidade_total,
-            "mensagem": f"{produto.nome} adicionado ao carrinho",
+            "mensagem": aviso or f"{produto.nome} adicionado ao carrinho",
         })
 
+    if aviso:
+        messages.warning(request, aviso)
     destino = request.POST.get("next", "")
     if destino and url_has_allowed_host_and_scheme(destino, allowed_hosts={request.get_host()}):
         return redirect(destino)
@@ -57,13 +92,24 @@ def adicionar(request, produto_id):
 def atualizar(request, produto_id):
     produto = get_object_or_404(Produto, pk=produto_id)
     carrinho = Carrinho(request)
-    carrinho.definir(produto_id, _inteiro(request.POST.get("quantidade"), 1))
-    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+    quantidade = _inteiro(request.POST.get("quantidade"), 1)
+
+    aviso = None
+    if produto.controla_estoque and quantidade > produto.estoque:
+        quantidade = produto.estoque
+        aviso = _texto_restantes(produto) if produto.estoque > 0 else f"{produto.nome} está esgotado."
+
+    carrinho.definir(produto_id, quantidade)
+
+    if _eh_ajax(request):
         return JsonResponse({
-            "ok": True,
+            "ok": aviso is None,
             "quantidade": carrinho.dados.get(str(produto.id), 0),
             "quantidade_total": carrinho.quantidade_total,
+            "mensagem": aviso or "",
         })
+    if aviso:
+        messages.warning(request, aviso)
     return redirect("carrinho:ver")
 
 
@@ -86,6 +132,9 @@ def trocar(request, produto_id):
         messages.error(request, "Para trocar pontos, confirme este aparelho na página de Fidelidade.")
         return redirect("fidelidade:pagina")
     produto = get_object_or_404(Produto, pk=produto_id, disponivel=True, permite_troca=True, pontos__gt=0)
+    if produto.esgotado:
+        messages.error(request, f"{produto.nome} está esgotado.")
+        return redirect("fidelidade:pagina")
     carrinho = Carrinho(request)
     custo = produto.custo_troca(config)
     if saldo(cliente) - carrinho.pontos_reservados(config) < custo:
